@@ -1,0 +1,10 @@
+feat: Stage 1 - Project foundation, architecture, and folder structure
+
+- Monorepo structure: client/ (React+Vite) and server/ (Express)
+- Tailwind CSS, React Router DOM, Axios, Lucide React configured
+- Express server with CORS, JSON parsing, centralized error handling
+- GET /api/health endpoint (200 OK verified)
+- Placeholder homepage with live API status indicator
+- Root package.json with concurrently dev script
+- .gitignore excludes node_modules, .env, dist, build
+- Full documentation: README, ARCHITECTURE, DEVELOPMENT_ROADMAP

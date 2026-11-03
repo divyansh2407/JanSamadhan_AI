@@ -1,0 +1,22 @@
+{
+  "name": "jansamadhan",
+  "version": "1.0.0",
+  "description": "JanSamadhan – AI-Powered Civic Problem Solving Platform for Indian Cities",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "npm run dev --prefix client",
+    "dev:server": "npm run dev --prefix server",
+    "install:all": "npm install && npm install --prefix client && npm install --prefix server",
+    "build": "npm run build --prefix client"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "author": "JanSamadhan Team",
+  "license": "MIT"
+}
