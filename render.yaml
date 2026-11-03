@@ -24,3 +24,4 @@ databases:
     plan: free
     databaseName: jansamadhan
     user: jansamadhan_user
+

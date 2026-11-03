@@ -142,3 +142,4 @@ After deploying, verify:
 1. `GET https://your-domain/api/health` ➡️ `{ status: "OK", database: "connected" }`
 2. `GET https://your-domain/api/categories` ➡️ 12 municipal categories returned.
 3. Open `https://your-domain` in browser ➡️ Interactive JanSamadhan citizen platform loaded.
+
