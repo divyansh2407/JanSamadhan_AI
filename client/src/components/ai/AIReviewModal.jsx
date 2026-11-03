@@ -226,3 +226,4 @@ AIReviewModal.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   loading: PropTypes.bool,
 };
+

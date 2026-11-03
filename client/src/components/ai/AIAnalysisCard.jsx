@@ -379,3 +379,4 @@ AIAnalysisCard.propTypes = {
   isOfficer: PropTypes.bool,
   loading: PropTypes.bool,
 };
+
