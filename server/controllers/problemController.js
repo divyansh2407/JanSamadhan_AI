@@ -5,6 +5,7 @@
 
 const crypto = require('crypto');
 const { prisma } = require('../config/db');
+const { analyzeProblemAsync } = require('../services/aiAnalysisService');
 
 
 const VALID_STATUSES = ['SUBMITTED', 'ACKNOWLEDGED', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'];
@@ -313,6 +314,13 @@ const createProblem = async (req, res, next) => {
 
       return problem;
     });
+
+    // Asynchronously trigger Grok AI Analysis without blocking HTTP response
+    try {
+      analyzeProblemAsync(newProblem.id);
+    } catch (aiErr) {
+      console.warn('AI trigger failed (non-blocking):', aiErr.message);
+    }
 
     res.status(201).json({
       success: true,

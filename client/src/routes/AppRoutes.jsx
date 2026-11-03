@@ -13,6 +13,7 @@ import ReportEntryPage from '../pages/report/ReportEntryPage';
 import ReportProblemForm from '../pages/report/ReportProblemForm';
 import ReportConfirmation from '../pages/report/ReportConfirmation';
 import TrackReportPage from '../pages/report/TrackReportPage';
+import AIAnalysisPreviewPage from '../pages/dashboards/AIAnalysisPreviewPage';
 import {
   GovernmentDashboard,
   UniversityDashboard,
@@ -49,6 +50,14 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['GOVERNMENT', 'SUPER_ADMIN']}>
             <GovernmentDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/government/ai-review/:problemId"
+        element={
+          <ProtectedRoute allowedRoles={['GOVERNMENT', 'SUPER_ADMIN']}>
+            <AIAnalysisPreviewPage />
           </ProtectedRoute>
         }
       />

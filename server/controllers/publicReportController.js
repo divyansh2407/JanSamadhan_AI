@@ -5,6 +5,7 @@
 
 const crypto = require('crypto');
 const { prisma } = require('../config/db');
+const { analyzeProblemAsync } = require('../services/aiAnalysisService');
 
 
 /**
@@ -136,6 +137,13 @@ const submitAnonymousReport = async (req, res, next) => {
 
       return problem;
     });
+
+    // Trigger Grok AI Analysis asynchronously without blocking HTTP response
+    try {
+      analyzeProblemAsync(result.id);
+    } catch (aiErr) {
+      console.warn('AI trigger failed (non-blocking):', aiErr.message);
+    }
 
     // 6. Return response containing secretTrackingToken ONCE
     return res.status(201).json({

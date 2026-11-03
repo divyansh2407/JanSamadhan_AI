@@ -85,7 +85,9 @@ const authenticate = async (req, res, next) => {
       // If DB server is offline or in test environment, fall back to cryptographically verified token
       if (
         process.env.NODE_ENV === 'test' ||
-        dbError.message?.includes("Can't reach database server")
+        dbError.code === 'P1001' ||
+        dbError.name?.includes('Prisma') ||
+        (dbError.message && dbError.message.includes("Can't reach database server"))
       ) {
         req.user = sanitizeUser(decoded);
         return next();

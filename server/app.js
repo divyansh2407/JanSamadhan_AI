@@ -20,6 +20,7 @@ const publicReportRoutes = require('./routes/publicReports');
 const path = require('path');
 const citizenRoutes = require('./routes/citizen');
 const uploadRoutes = require('./routes/upload');
+const aiRoutes = require('./routes/ai');
 
 
 
@@ -71,6 +72,7 @@ app.use('/api/problems', problemRoutes);
 app.use('/api/public/reports', publicReportRoutes);
 app.use('/api/citizen', citizenRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/ai', aiRoutes);
 
 
 

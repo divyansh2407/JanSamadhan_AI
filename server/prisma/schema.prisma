@@ -315,23 +315,43 @@ model ProblemStatusHistory {
   @@map("problem_status_histories")
 }
 
-/// AI analysis records (prepared for Grok API integration)
+/// AI analysis records using Grok API by xAI (Stage 7)
 model AIAnalysis {
-  id                    String   @id @default(uuid())
+  id                    String    @id @default(uuid())
   problemId             String
   summary               String
   detectedCategory      String
+  categoryConfidence    Float?    @default(0.9)
   severity              String
-  suggestedSolutions    String
+  severityConfidence    Float?    @default(0.85)
+  severityReason        String?
+  suggestedSolutions    String    // JSON encoded array of solution proposals
   recommendedDepartment String
-  confidence            Float
-  modelName             String
-  createdAt             DateTime @default(now())
+  departmentConfidence  Float?    @default(0.9)
+  urgency               String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  possibleDuplicates    String?   @default("[]") // JSON encoded array of duplicates
+  confidence            Float     @default(0.9) // Overall composite confidence
+  modelName             String    @default("grok-2-latest")
+  processingStatus      String    @default("COMPLETED") // PENDING, PROCESSING, COMPLETED, FAILED
+  errorMessage          String?
+  requiresHumanReview   Boolean   @default(true)
+  reviewStatus          String    @default("PENDING") // PENDING, ACCEPTED, EDITED, REJECTED
+  reviewedBy            String?
+  reviewedAt            DateTime?
+  reviewNotes           String?
+  promptTokens          Int?      @default(0)
+  completionTokens      Int?      @default(0)
+  totalTokens           Int?      @default(0)
+  durationMs            Int?      @default(0)
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @default(now()) @updatedAt
 
   // Foreign Key Relation
   problem Problem @relation("ProblemAIAnalyses", fields: [problemId], references: [id], onDelete: Cascade)
 
   @@index([problemId])
+  @@index([processingStatus])
+  @@index([reviewStatus])
   @@map("ai_analyses")
 }
 
