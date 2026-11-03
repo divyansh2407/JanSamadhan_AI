@@ -60,3 +60,4 @@ CategoryIcon.propTypes = {
   categoryName: PropTypes.string,
   className: PropTypes.string,
 };
+
