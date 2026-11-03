@@ -491,3 +491,4 @@ runTestSuite().catch((err) => {
   console.error('Fatal test error in test-auth-complaint-suite:', err);
   process.exit(1);
 });
+

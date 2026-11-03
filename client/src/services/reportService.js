@@ -11,8 +11,14 @@ export const reportService = {
    * Fetch all active problem categories
    */
   async getCategories() {
-    const response = await api.get('/categories');
-    return response.data?.data || [];
+    try {
+      const response = await api.get('/categories');
+      const list = response.data?.data || response.data?.categories || response.data;
+      return Array.isArray(list) ? list : [];
+    } catch (err) {
+      console.warn('⚠️ [ReportService] Failed to fetch categories from API:', err.message);
+      return [];
+    }
   },
 
   /**

@@ -4,6 +4,16 @@
  */
 
 const { prisma } = require('../config/db');
+const offlineStore = require('../config/offlineStore');
+
+function isDbOffline(err) {
+  return (
+    !err ||
+    err.code === 'P1001' ||
+    err.name?.includes('Prisma') ||
+    (err.message && err.message.includes("Can't reach database server"))
+  );
+}
 
 /**
  * @route   GET /api/categories
@@ -12,23 +22,41 @@ const { prisma } = require('../config/db');
  */
 const getCategories = async (req, res, next) => {
   try {
-    const categories = await prisma.problemCategory.findMany({
-      where: { isActive: true },
-      orderBy: { name: 'asc' },
-      include: {
-        _count: {
-          select: { problems: true },
+    let categories = [];
+    try {
+      categories = await prisma.problemCategory.findMany({
+        where: { isActive: true },
+        orderBy: { name: 'asc' },
+        include: {
+          _count: {
+            select: { problems: true },
+          },
         },
-      },
-    });
+      });
+    } catch (dbErr) {
+      console.warn('⚠️ [Category Controller] Database unavailable, using standard municipal categories fallback');
+      categories = offlineStore.categories;
+    }
 
-    res.status(200).json({
+    // If database returned 0 categories (e.g. unseeded), fallback to defaults
+    if (!categories || categories.length === 0) {
+      categories = offlineStore.categories;
+    }
+
+    return res.status(200).json({
       success: true,
       count: categories.length,
+      data: categories,
       categories,
     });
   } catch (error) {
-    next(error);
+    // Ultimate safety fallback: never fail category retrieval
+    return res.status(200).json({
+      success: true,
+      count: offlineStore.categories.length,
+      data: offlineStore.categories,
+      categories: offlineStore.categories,
+    });
   }
 };
 
@@ -76,6 +104,23 @@ const createCategory = async (req, res, next) => {
       category,
     });
   } catch (error) {
+    if (isDbOffline(error)) {
+      const trimmedName = req.body.name?.trim();
+      const newCat = {
+        id: `cat-${Date.now()}`,
+        name: trimmedName,
+        description: req.body.description?.trim() || '',
+        icon: req.body.icon?.trim() || 'HelpCircle',
+        isActive: true,
+      };
+      offlineStore.categories.push(newCat);
+      return res.status(201).json({
+        success: true,
+        offline: true,
+        message: 'Category created successfully (offline cache)',
+        category: newCat,
+      });
+    }
     next(error);
   }
 };

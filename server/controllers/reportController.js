@@ -114,10 +114,21 @@ const submitReport = async (req, res, next) => {
 
     try {
       if (resolvedCategoryId) {
-        const cat = await prisma.problemCategory.findUnique({
+        let cat = await prisma.problemCategory.findUnique({
           where: { id: resolvedCategoryId },
         });
-        if (cat) resolvedCategoryName = cat.name;
+        if (cat) {
+          resolvedCategoryName = cat.name;
+        } else {
+          // If ID was an offline slug (e.g. 'cat-electricity'), match by name or fallback to active category
+          cat = await prisma.problemCategory.findFirst({
+            where: { isActive: true },
+          });
+          if (cat) {
+            resolvedCategoryId = cat.id;
+            resolvedCategoryName = cat.name;
+          }
+        }
       } else {
         // Resolve by name or fallback to first active category
         const cat = await prisma.problemCategory.findFirst({

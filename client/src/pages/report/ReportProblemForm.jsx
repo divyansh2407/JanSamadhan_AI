@@ -41,6 +41,81 @@ const SEVERITY_LEVELS = [
 
 const POPULAR_CITIES = ['Pune', 'Mumbai', 'Nagpur', 'Nashik', 'Thane', 'Bengaluru', 'Delhi', 'Hyderabad'];
 
+export const DEFAULT_CATEGORIES = [
+  {
+    id: 'cat-roads',
+    name: 'Roads and Potholes',
+    description: 'Potholes, damaged pavements, road cave-ins, and unfinished asphalt work.',
+    icon: 'Construction',
+  },
+  {
+    id: 'cat-garbage',
+    name: 'Garbage and Waste Management',
+    description: 'Overflowing dumpsters, uncollected domestic waste, and illegal debris dumping.',
+    icon: 'Trash2',
+  },
+  {
+    id: 'cat-water',
+    name: 'Water Supply and Leakage',
+    description: 'Pipeline bursts, low water pressure, contaminated supply, and leaking public taps.',
+    icon: 'Droplets',
+  },
+  {
+    id: 'cat-drainage',
+    name: 'Drainage and Sewage',
+    description: 'Blocked stormwater drains, sewage overflow, broken manhole covers, and backflow.',
+    icon: 'Waves',
+  },
+  {
+    id: 'cat-electricity',
+    name: 'Electricity and Streetlights',
+    description: 'Dark streetlights, leaning electric poles, sparking transformers, and dangling cables.',
+    icon: 'Zap',
+  },
+  {
+    id: 'cat-traffic',
+    name: 'Traffic and Transportation',
+    description: 'Broken traffic lights, missing road signage, junction bottlenecks, and bus stop damage.',
+    icon: 'Car',
+  },
+  {
+    id: 'cat-pollution',
+    name: 'Air and Noise Pollution',
+    description: 'Industrial emissions, open garbage burning, and excessive construction noise.',
+    icon: 'Wind',
+  },
+  {
+    id: 'cat-infrastructure',
+    name: 'Public Infrastructure',
+    description: 'Damaged footbridges, municipal school buildings, cracked community walls, and barriers.',
+    icon: 'Building2',
+  },
+  {
+    id: 'cat-safety',
+    name: 'Public Safety',
+    description: 'Unlit dark corridors, open excavation trenches, abandoned structures, and stray hazards.',
+    icon: 'ShieldAlert',
+  },
+  {
+    id: 'cat-sanitation',
+    name: 'Sanitation and Hygiene',
+    description: 'Unhygienic public toilets, stagnant vector breeding pools, and open defecation spots.',
+    icon: 'Sparkles',
+  },
+  {
+    id: 'cat-parks',
+    name: 'Parks and Public Spaces',
+    description: 'Overgrown public parks, vandalized playground equipment, and damaged walking tracks.',
+    icon: 'Trees',
+  },
+  {
+    id: 'cat-other',
+    name: 'Other Civic Issues',
+    description: 'Civic grievances not covered under standard municipal classifications.',
+    icon: 'HelpCircle',
+  },
+];
+
 export default function ReportProblemForm() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -53,10 +128,10 @@ export default function ReportProblemForm() {
   // Step tracker (1 to 5)
   const [currentStep, setCurrentStep] = useState(1);
 
-  // Categories state
-  const [categories, setCategories] = useState([]);
+  // Categories state initialized with defaults for instantaneous zero-latency display
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [categorySearch, setCategorySearch] = useState('');
-  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingCategories, setLoadingCategories] = useState(false);
 
   // Form Fields
   const [formData, setFormData] = useState({
@@ -99,27 +174,90 @@ export default function ReportProblemForm() {
     }
   }, [isAnonymous, isAuthenticated, navigate]);
 
-  // Load categories from backend
+  // Load categories from backend (with instantaneous fallback)
   useEffect(() => {
+    let isMounted = true;
     const fetchCats = async () => {
       try {
-        setLoadingCategories(true);
         const data = await reportService.getCategories();
-        setCategories(data);
+        if (isMounted && Array.isArray(data) && data.length > 0) {
+          setCategories(data);
+        }
       } catch (err) {
-        console.error('Failed to load categories:', err);
+        console.warn('Using standard municipal categories fallback:', err);
       } finally {
-        setLoadingCategories(false);
+        if (isMounted) setLoadingCategories(false);
       }
     };
     fetchCats();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Filter categories by search
-  const filteredCategories = categories.filter((cat) =>
-    cat.name.toLowerCase().includes(categorySearch.toLowerCase()) ||
-    (cat.description && cat.description.toLowerCase().includes(categorySearch.toLowerCase()))
-  );
+  // Smart multi-word, space-collapsed, and synonym category matching
+  const filteredCategories = categories.filter((cat) => {
+    const rawSearch = categorySearch.toLowerCase().trim();
+    if (!rawSearch) return true;
+
+    const name = (cat.name || '').toLowerCase();
+    const desc = (cat.description || '').toLowerCase();
+
+    // 1. Direct substring match on name or description
+    if (name.includes(rawSearch) || desc.includes(rawSearch)) {
+      return true;
+    }
+
+    // 2. Whitespace-removed match (e.g. "street light" matches "Electricity and Streetlights")
+    const collapsedSearch = rawSearch.replace(/[\s\-_]+/g, '');
+    const collapsedName = name.replace(/[\s\-_]+/g, '');
+    const collapsedDesc = desc.replace(/[\s\-_]+/g, '');
+    if (collapsedName.includes(collapsedSearch) || collapsedDesc.includes(collapsedSearch)) {
+      return true;
+    }
+
+    // 3. Multi-word match: every word in the search query appears in name or description
+    const words = rawSearch.split(/[\s\-_]+/).filter((w) => w.length > 1);
+    if (words.length > 0) {
+      const allWordsMatch = words.every(
+        (word) => name.includes(word) || desc.includes(word) || collapsedName.includes(word)
+      );
+      if (allWordsMatch) return true;
+    }
+
+    // 4. Common civic synonyms / aliases
+    const aliases = {
+      'street light': ['electricity', 'light', 'lamp', 'pole'],
+      'streetlight': ['electricity', 'light', 'lamp', 'pole'],
+      'light': ['electricity', 'streetlight'],
+      'electric': ['power', 'transformer', 'cable'],
+      'pothole': ['road', 'pavement', 'asphalt'],
+      'road': ['pothole', 'footpath', 'traffic'],
+      'garbage': ['waste', 'trash', 'dumpster', 'sanitation'],
+      'waste': ['garbage', 'trash', 'sanitation'],
+      'water': ['pipeline', 'leakage', 'tap', 'drainage'],
+      'drain': ['sewage', 'manhole', 'water', 'drainage'],
+      'sewage': ['drainage', 'manhole', 'waste'],
+      'traffic': ['transportation', 'signal', 'bus', 'car'],
+      'pollution': ['air', 'noise', 'smoke'],
+      'safety': ['hazard', 'dark', 'trench'],
+      'park': ['garden', 'playground', 'trees'],
+    };
+
+    for (const [key, related] of Object.entries(aliases)) {
+      if (rawSearch.includes(key) || key.includes(rawSearch)) {
+        if (
+          related.some((r) => name.includes(r) || desc.includes(r)) ||
+          name.includes(key) ||
+          desc.includes(key)
+        ) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  });
 
   const selectedCategoryObj = categories.find((c) => c.id === formData.categoryId);
 
@@ -478,6 +616,23 @@ export default function ReportProblemForm() {
                   <div className="py-12 flex flex-col items-center justify-center gap-2 text-civic-secondary text-xs">
                     <Loader2 className="w-6 h-6 animate-spin text-green-600" />
                     <span>Loading municipal categories...</span>
+                  </div>
+                ) : filteredCategories.length === 0 ? (
+                  <div className="py-12 px-4 text-center rounded-2xl border border-dashed border-gray-300 bg-gray-50/50">
+                    <HelpCircle className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <p className="text-xs font-semibold text-gray-700">
+                      No categories found matching &quot;{categorySearch}&quot;
+                    </p>
+                    <p className="text-[11px] text-gray-500 mt-1">
+                      Try searching for &quot;street light&quot;, &quot;pothole&quot;, &quot;garbage&quot;, &quot;drainage&quot;, or &quot;water&quot;.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setCategorySearch('')}
+                      className="mt-3 inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 transition-colors"
+                    >
+                      Clear Search
+                    </button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">

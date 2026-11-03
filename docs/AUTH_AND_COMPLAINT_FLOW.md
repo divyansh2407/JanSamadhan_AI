@@ -147,3 +147,4 @@ node test-auth-complaint-suite.js
 11. **TEST 11**: Public Tracking View & Zero-PII Defense (no citizen email, phone, or password exposed).
 12. **TEST 12**: Insecure Direct Object Reference (IDOR) Defense (User 2 blocked from viewing User 1's complaints).
 13. **TEST 13**: Email Provider Failure Resilience (complaint creation succeeds with 201 even when email service encounters network error).
+

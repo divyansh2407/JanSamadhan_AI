@@ -15,11 +15,90 @@ class OfflineStore {
     this.emailNotifications = [];
     this.problemStatusHistories = [];
     this.categories = [
-      { id: 'cat-roads-01', name: 'Roads & Footpaths', icon: 'Construction', isActive: true },
-      { id: 'cat-waste-02', name: 'Solid Waste & Sanitation', icon: 'Trash2', isActive: true },
-      { id: 'cat-water-03', name: 'Water Supply & Drainage', icon: 'Droplets', isActive: true },
-      { id: 'cat-street-04', name: 'Street Lighting & Electrical', icon: 'Lightbulb', isActive: true },
-      { id: 'cat-traffic-05', name: 'Traffic & Signage', icon: 'Car', isActive: true },
+      {
+        id: 'cat-roads',
+        name: 'Roads and Potholes',
+        description: 'Potholes, damaged pavements, road cave-ins, and unfinished asphalt work.',
+        icon: 'Construction',
+        isActive: true,
+      },
+      {
+        id: 'cat-garbage',
+        name: 'Garbage and Waste Management',
+        description: 'Overflowing dumpsters, uncollected domestic waste, and illegal debris dumping.',
+        icon: 'Trash2',
+        isActive: true,
+      },
+      {
+        id: 'cat-water',
+        name: 'Water Supply and Leakage',
+        description: 'Pipeline bursts, low water pressure, contaminated supply, and leaking public taps.',
+        icon: 'Droplets',
+        isActive: true,
+      },
+      {
+        id: 'cat-drainage',
+        name: 'Drainage and Sewage',
+        description: 'Blocked stormwater drains, sewage overflow, broken manhole covers, and backflow.',
+        icon: 'Waves',
+        isActive: true,
+      },
+      {
+        id: 'cat-electricity',
+        name: 'Electricity and Streetlights',
+        description: 'Dark streetlights, leaning electric poles, sparking transformers, and dangling cables.',
+        icon: 'Zap',
+        isActive: true,
+      },
+      {
+        id: 'cat-traffic',
+        name: 'Traffic and Transportation',
+        description: 'Broken traffic lights, missing road signage, junction bottlenecks, and bus stop damage.',
+        icon: 'Car',
+        isActive: true,
+      },
+      {
+        id: 'cat-pollution',
+        name: 'Air and Noise Pollution',
+        description: 'Industrial emissions, open garbage burning, and excessive construction noise.',
+        icon: 'Wind',
+        isActive: true,
+      },
+      {
+        id: 'cat-infrastructure',
+        name: 'Public Infrastructure',
+        description: 'Damaged footbridges, municipal school buildings, cracked community walls, and barriers.',
+        icon: 'Building2',
+        isActive: true,
+      },
+      {
+        id: 'cat-safety',
+        name: 'Public Safety',
+        description: 'Unlit dark corridors, open excavation trenches, abandoned structures, and stray hazards.',
+        icon: 'ShieldAlert',
+        isActive: true,
+      },
+      {
+        id: 'cat-sanitation',
+        name: 'Sanitation and Hygiene',
+        description: 'Unhygienic public toilets, stagnant vector breeding pools, and open defecation spots.',
+        icon: 'Sparkles',
+        isActive: true,
+      },
+      {
+        id: 'cat-parks',
+        name: 'Parks and Public Spaces',
+        description: 'Overgrown public parks, vandalized playground equipment, and damaged walking tracks.',
+        icon: 'Trees',
+        isActive: true,
+      },
+      {
+        id: 'cat-other',
+        name: 'Other Civic Issues',
+        description: 'Civic grievances not covered under standard municipal classifications.',
+        icon: 'HelpCircle',
+        isActive: true,
+      },
     ];
   }
 
@@ -203,3 +282,4 @@ class OfflineStore {
 
 const offlineStore = new OfflineStore();
 module.exports = offlineStore;
+

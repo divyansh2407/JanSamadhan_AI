@@ -33,10 +33,12 @@ import mapService from '../../services/mapService';
 import reportService from '../../services/reportService';
 import { CITY_CENTERS, DEFAULT_CENTER } from '../../utils/mapUtils';
 
+import { DEFAULT_CATEGORIES } from '../report/ReportProblemForm';
+
 export default function CityMapExplorerPage() {
   const [city, setCity] = useState('Pune');
   const [reports, setReports] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedReport, setSelectedReport] = useState(null);
@@ -64,7 +66,7 @@ export default function CityMapExplorerPage() {
           reportService.getCategories(),
           mapService.getMapSummary(city),
         ]);
-        setCategories(cats);
+        if (Array.isArray(cats) && cats.length > 0) setCategories(cats);
         setSummary(sum);
       } catch (err) {
         console.error('Failed to load map metadata:', err);

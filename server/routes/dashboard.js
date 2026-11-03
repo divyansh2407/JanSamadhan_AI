@@ -12,3 +12,4 @@ const { getDashboardStats } = require('../controllers/dashboardController');
 router.get('/stats', authenticate, getDashboardStats);
 
 module.exports = router;
+

@@ -22,3 +22,4 @@ router.post('/', authenticate, submitReport);
 router.get('/:trackingId', authenticate, getReportByTrackingId);
 
 module.exports = router;
+
