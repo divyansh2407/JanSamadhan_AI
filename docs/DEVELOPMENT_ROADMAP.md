@@ -71,24 +71,40 @@ JanSamadhan is built in modular stages. Each stage is independently testable and
 
 ---
 
-## Stage 4 – Citizen Dashboard & Problem Reporting
+## Stage 4 – PostgreSQL Database Architecture & Core Backend APIs ✅
+
+**Status:** Complete
+
+### Deliverables
+- [x] Primary database architecture transitioned to PostgreSQL + Prisma ORM
+- [x] Prisma schema with 11 relational models: `User`, `Department`, `ProblemCategory`, `Problem`, `AIAnalysis`, `SolutionProposal`, `Collaboration`, `ImplementationTask`, `Notification`, `ActivityLog`, `Feedback`
+- [x] PostgreSQL Enums: `UserRole`, `ProblemSeverity`, `ProblemPriority`, `ProblemStatus`, `ProposalStatus`, `CollaborationStatus`, `TaskStatus`
+- [x] Foreign-key constraints, cascade rules, indexes, and unique constraints
+- [x] Migration of existing Stage 3 authentication (login, registration, JWT, bcrypt) to Prisma & PostgreSQL
+- [x] Idempotent database seeding script (`prisma/seed.js`) populating initial civic categories
+- [x] User REST APIs: `GET /api/users/me`, `GET /api/users/:id`, `PATCH /api/users/me`
+- [x] Department REST APIs: `GET /api/departments`, `GET /api/departments/:id`, `POST /api/departments`, `PATCH /api/departments/:id`
+- [x] Category REST APIs: `GET /api/categories`, `POST /api/categories`
+- [x] Problem Management REST APIs: `GET /api/problems` (with pagination, multi-field filtering, sorting), `GET /api/problems/:id`, `POST /api/problems`, `PATCH /api/problems/:id`, `DELETE /api/problems/:id`
+- [x] Grok AI service architectural scaffold (`services/aiService.js`) with `XAI_API_KEY` configuration
+- [x] Automated test suite verifying 35/35 assertions with 100% pass rate
+
+---
+
+## Stage 5 – Citizen Dashboard & Problem Reporting Frontend
 
 **Status:** Planned
 
 ### Deliverables
-- [ ] `Report` Mongoose model (title, description, category, location, images, status, upvotes)
-- [ ] Reports CRUD API: `POST /api/reports`, `GET /api/reports`, `GET /api/reports/:id`, `PATCH /api/reports/:id`
-- [ ] Image upload with `multer` (Cloudinary integration)
-- [ ] Geo-location capture and storage (lat/lng)
-- [ ] Citizen dashboard page (my reports, stats, activity feed)
-- [ ] Problem report form with category selection, image upload, location picker
-- [ ] Report detail page with timeline
-- [ ] Report status tracker (Submitted → Acknowledged → In Progress → Resolved)
-- [ ] Upvote / community endorsement feature
+- [ ] Interactive Citizen problem reporting form (category selection, address, description)
+- [ ] Geo-location capture (lat/lng) and pincode validation
+- [ ] Citizen dashboard with active reports, timeline tracking, and resolution history
+- [ ] Problem status tracker (Submitted → Acknowledged → In Progress → Resolved)
+- [ ] Community upvoting & feedback post-resolution
 
 ---
 
-## Stage 5 – Admin Panel & Case Management
+## Stage 6 – Admin Panel & Government Case Management
 
 **Status:** Planned
 

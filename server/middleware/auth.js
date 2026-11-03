@@ -1,10 +1,19 @@
 /**
  * JanSamadhan – Authentication & Authorization Middleware
- * Verifies JWT tokens and enforces Role-Based Access Control (RBAC).
+ * Verifies JWT tokens using Prisma ORM and enforces Role-Based Access Control (RBAC).
  */
 
-const User = require('../models/User');
+const { prisma } = require('../config/db');
 const { verifyToken } = require('../utils/jwt');
+
+/**
+ * Strips sensitive fields (like passwordHash) from user record.
+ */
+const sanitizeUser = (user) => {
+  if (!user) return null;
+  const { passwordHash, ...safeUser } = user;
+  return safeUser;
+};
 
 /**
  * Protects routes by validating JWT from HTTP-only cookie or Bearer header.
@@ -49,8 +58,10 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Load active user from database
-    const user = await User.findById(decoded.id);
+    // Load active user from PostgreSQL via Prisma
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.id },
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -66,8 +77,8 @@ const authenticate = async (req, res, next) => {
       });
     }
 
-    // Attach user to request
-    req.user = user;
+    // Attach sanitized user to request
+    req.user = sanitizeUser(user);
     next();
   } catch (error) {
     next(error);
@@ -102,5 +113,5 @@ const authorize = (...roles) => {
 module.exports = {
   authenticate,
   authorize,
+  sanitizeUser,
 };
-

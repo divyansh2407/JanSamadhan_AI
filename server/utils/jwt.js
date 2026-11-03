@@ -1,5 +1,5 @@
 /**
- * JanSamadhan – JWT Authentication Utilities
+ * JanSamadhan – JWT Authentication Utilities (PostgreSQL / Prisma ORM)
  * Handles token generation, verification, and HTTP-only cookie delivery.
  */
 
@@ -19,7 +19,7 @@ const getJwtExpiresIn = () => {
 const generateToken = (user) => {
   return jwt.sign(
     {
-      id: user._id,
+      id: user.id || user._id,
       role: user.role,
       email: user.email,
     },
@@ -61,7 +61,7 @@ const sendTokenResponse = (user, statusCode, res, message = 'Success') => {
       message,
       token,
       user: {
-        id: user._id,
+        id: user.id || user._id,
         name: user.name,
         email: user.email,
         phone: user.phone,
@@ -92,4 +92,3 @@ module.exports = {
   sendTokenResponse,
   clearTokenCookie,
 };
-

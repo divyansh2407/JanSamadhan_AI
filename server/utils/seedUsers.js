@@ -1,16 +1,17 @@
 /**
- * JanSamadhan – Seed Script for Testing Privileged Accounts
+ * JanSamadhan – Seed Script for Testing Privileged Accounts (Prisma ORM)
  * Generates verified test users for all 6 roles with documented credentials.
  * Run with: node server/utils/seedUsers.js
  */
 
 const dotenv = require('dotenv');
 const path = require('path');
-const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const { PrismaClient } = require('@prisma/client');
 
 dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
-const User = require('../models/User');
+const prisma = new PrismaClient();
 
 const SEED_USERS = [
   {
@@ -64,32 +65,39 @@ const SEED_USERS = [
 ];
 
 async function seed() {
-  const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
-  if (!uri) {
-    console.error('❌ MONGODB_URI is not defined in server/.env');
-    process.exit(1);
-  }
+  console.log('🌱 Seeding Test Accounts into PostgreSQL via Prisma…\n');
 
   try {
-    await mongoose.connect(uri);
-    console.log('Connected to MongoDB for seeding...');
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash('Password@123', salt);
 
     for (const u of SEED_USERS) {
-      const exists = await User.findOne({ email: u.email });
-      if (exists) {
-        console.log(`ℹ️  User already exists: ${u.email} (${u.role})`);
-      } else {
-        await User.create(u);
-        console.log(`✅ Created test user: ${u.email} [${u.role}] (pwd: Password@123)`);
-      }
+      const user = await prisma.user.upsert({
+        where: { email: u.email },
+        update: {
+          name: u.name,
+          phone: u.phone,
+          role: u.role,
+          isVerified: u.isVerified,
+        },
+        create: {
+          name: u.name,
+          email: u.email,
+          phone: u.phone,
+          passwordHash,
+          role: u.role,
+          isVerified: u.isVerified,
+        },
+      });
+      console.log(`  ✅ User: ${user.email} [${user.role}]`);
     }
 
-    console.log('\n✨ Seeding completed successfully!');
-    await mongoose.disconnect();
-    process.exit(0);
+    console.log('\n✨ Test account seeding completed successfully.');
   } catch (err) {
-    console.error('Seeding error:', err.message);
+    console.error('❌ Seeding error:', err.message);
     process.exit(1);
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
@@ -98,4 +106,3 @@ if (require.main === module) {
 }
 
 module.exports = { SEED_USERS, seed };
-

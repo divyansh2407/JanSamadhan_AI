@@ -1,6 +1,7 @@
 /**
  * JanSamadhan – Express Application
- * Configures middleware, security, routes, and error handling.
+ * PostgreSQL / Prisma ORM Architecture
+ * Configures middleware, security, REST API routes, and error handling.
  */
 
 const express = require('express');
@@ -11,6 +12,10 @@ const dotenv = require('dotenv');
 const errorHandler = require('./middleware/errorHandler');
 const healthRoutes = require('./routes/health');
 const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+const departmentRoutes = require('./routes/departments');
+const categoryRoutes = require('./routes/categories');
+const problemRoutes = require('./routes/problems');
 
 // Load environment variables
 dotenv.config();
@@ -35,7 +40,7 @@ app.use(
       }
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     },
-    credentials: true, // Crucial for HTTP-only cookies
+    credentials: true, // Crucial for HTTP-only session cookies
   })
 );
 
@@ -49,6 +54,10 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/departments', departmentRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/problems', problemRoutes);
 
 // 404 handler for unknown API routes
 app.use('/api/*', (req, res) => {

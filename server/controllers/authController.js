@@ -1,10 +1,12 @@
 /**
- * JanSamadhan – Authentication Controller
- * Handles user registration, login, session validation, and logout.
+ * JanSamadhan – Authentication Controller (PostgreSQL / Prisma ORM)
+ * Handles citizen registration, login, session validation, and logout.
  */
 
-const User = require('../models/User');
+const bcrypt = require('bcryptjs');
+const { prisma } = require('../config/db');
 const { sendTokenResponse, clearTokenCookie } = require('../utils/jwt');
+const { sanitizeUser } = require('../middleware/auth');
 const {
   validateRegistrationInput,
   validateLoginInput,
@@ -33,7 +35,10 @@ const register = async (req, res, next) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // Prevent duplicate email registration
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
+
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -41,17 +46,23 @@ const register = async (req, res, next) => {
       });
     }
 
+    // Hash password with bcrypt
+    const salt = await bcrypt.genSalt(10);
+    const passwordHash = await bcrypt.hash(password, salt);
+
     // SECURITY: Never trust role from frontend in public registration
-    const newUser = await User.create({
-      name: name.trim(),
-      email: normalizedEmail,
-      phone: phone.trim(),
-      password,
-      role: 'CITIZEN', // STRICT ENFORCEMENT
+    const newUser = await prisma.user.create({
+      data: {
+        name: name.trim(),
+        email: normalizedEmail,
+        phone: phone.trim(),
+        passwordHash,
+        role: 'CITIZEN', // STRICT ENFORCEMENT
+      },
     });
 
     sendTokenResponse(
-      newUser,
+      sanitizeUser(newUser),
       201,
       res,
       'Registration successful. Welcome to JanSamadhan!'
@@ -82,8 +93,10 @@ const login = async (req, res, next) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Look up user including password hash for verification
-    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+    // Look up user from PostgreSQL
+    const user = await prisma.user.findUnique({
+      where: { email: normalizedEmail },
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -93,7 +106,7 @@ const login = async (req, res, next) => {
     }
 
     // Verify password hash
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
       return res.status(401).json({
         success: false,
@@ -109,7 +122,7 @@ const login = async (req, res, next) => {
       });
     }
 
-    sendTokenResponse(user, 200, res, 'Login successful.');
+    sendTokenResponse(sanitizeUser(user), 200, res, 'Login successful.');
   } catch (error) {
     next(error);
   }
@@ -118,7 +131,7 @@ const login = async (req, res, next) => {
 /**
  * @route   POST /api/auth/logout
  * @desc    Log out current user & clear HTTP-only cookie
- * @access  Public (or Authenticated)
+ * @access  Public
  */
 const logout = async (req, res) => {
   clearTokenCookie(res);
@@ -146,4 +159,3 @@ module.exports = {
   logout,
   getMe,
 };
-

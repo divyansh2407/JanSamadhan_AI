@@ -1,6 +1,6 @@
 # JanSamadhan – Architecture Overview
 
-> **Stage 1: Initial Frontend / Backend Architecture**
+> **Stage 4: PostgreSQL Database Architecture & Core Backend APIs**
 
 ---
 
@@ -13,34 +13,53 @@
 │   React 18 + Vite  (http://localhost:5173)                     │
 │   ┌──────────────────────────────────────────────────────────┐ │
 │   │  React Router DOM  →  Pages  →  Components               │ │
-│   │  Axios (services/api.js)                                  │ │
-│   │  Tailwind CSS + Lucide React                              │ │
+│   │  Axios (services/api.js, withCredentials: true)          │ │
+│   │  Tailwind CSS + Lucide React + Framer Motion             │ │
 │   └──────────────────────┬───────────────────────────────────┘ │
 └─────────────────────────-│──────────────────────────────────── ┘
                            │  HTTP / REST  (/api/*)
-                           │  (proxied by Vite dev server)
+                           │  (HTTP-only session cookies / Bearer JWT)
 ┌──────────────────────────▼─────────────────────────────────────┐
 │                    Express.js API Server                        │
 │                 (http://localhost:5000)                         │
 │                                                                │
 │   server.js  ──▶  app.js                                       │
 │                     │                                          │
-│                     ├─▶  CORS Middleware                       │
+│                     ├─▶  CORS (with credentials)               │
+│                     ├─▶  cookie-parser                         │
 │                     ├─▶  JSON Body Parser                      │
-│                     ├─▶  Routes (/api/health, …)               │
+│                     ├─▶  Rate Limiter                          │
+│                     ├─▶  Routes:                               │
+│                     │     • /api/health                        │
+│                     │     • /api/auth                          │
+│                     │     • /api/users                         │
+│                     │     • /api/departments                   │
+│                     │     • /api/categories                    │
+│                     │     • /api/problems                      │
 │                     ├─▶  Controllers                           │
-│                     ├─▶  Services (business logic)             │
+│                     ├─▶  Services (aiService.js xAI scaffold)   │
 │                     └─▶  Error Handler Middleware              │
 │                                                                │
-└────────────────────────────────────────────────────────────────┘
+└──────────────────────────┬─────────────────────────────────────┘
                            │
-                           │  (Stage 2+)
+                           │  Prisma Client ORM (Type-Safe SQL)
                            ▼
-┌───────────────────────────────────────────────────────────────┐
-│                  MongoDB (Atlas / Local)                       │
-│                  Mongoose ODM                                  │
-│   Collections: users, reports, comments, departments, …       │
-└───────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│                  PostgreSQL Relational Database                 │
+│                                                                │
+│   Tables (schema.prisma):                                      │
+│   • users (CITIZEN, GOVERNMENT, UNIVERSITY, EXPERT, ...)       │
+│   • departments                                                │
+│   • problem_categories                                         │
+│   • problems (severity, priority, status, geo-location)        │
+│   • ai_analyses (Grok API results)                             │
+│   • solution_proposals                                         │
+│   • collaborations                                             │
+│   • implementation_tasks                                       │
+│   • notifications                                              │
+│   • activity_logs                                              │
+│   • feedbacks                                                  │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ---

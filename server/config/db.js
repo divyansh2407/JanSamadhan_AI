@@ -1,46 +1,86 @@
 /**
- * JanSamadhan – Database Connection
- * Connects to MongoDB Atlas or local MongoDB using Mongoose.
+ * JanSamadhan – PostgreSQL Database Connection via Prisma ORM
+ * Provides a singleton Prisma client instance and health verification utilities.
  */
 
-const mongoose = require('mongoose');
+const { PrismaClient } = require('@prisma/client');
+
+let prisma;
+
+if (process.env.NODE_ENV === 'production') {
+  prisma = new PrismaClient({
+    log: ['error', 'warn'],
+  });
+} else {
+  // Prevent multiple client instances in development during hot-reload
+  if (!global.prisma) {
+    global.prisma = new PrismaClient({
+      log: ['query', 'info', 'warn', 'error'],
+    });
+  }
+  prisma = global.prisma;
+}
 
 let isConnected = false;
 
+/**
+ * Verifies active connectivity to the PostgreSQL database.
+ */
 const connectDB = async () => {
-  const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+  const dbUrl = process.env.DATABASE_URL;
 
-  if (!uri) {
+  if (!dbUrl) {
     console.warn(
-      '⚠️  MONGODB_URI is not set in environment variables. Database operations will fail until configured.'
+      '⚠️  DATABASE_URL is not set in environment variables. PostgreSQL operations will fail.'
     );
     return false;
   }
 
   try {
-    const conn = await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 5000,
-    });
-
+    await prisma.$connect();
     isConnected = true;
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}/${conn.connection.name}`);
+    console.log('✅ PostgreSQL Database connected successfully via Prisma ORM');
     return true;
   } catch (error) {
     isConnected = false;
-    console.error(`❌ MongoDB Connection Error: ${error.message}`);
+    console.error(`❌ PostgreSQL Connection Error: ${error.message}`);
     console.warn(
-      '💡 Tip: Provide a valid MongoDB Atlas connection string in server/.env (MONGODB_URI=...)'
+      '💡 Tip: Configure a valid PostgreSQL DATABASE_URL in server/.env (e.g. Supabase, Neon, or local PostgreSQL)'
     );
     return false;
   }
 };
 
-const getDBStatus = () => ({
-  isConnected,
-  readyState: mongoose.connection.readyState,
-});
+/**
+ * Gracefully disconnects Prisma client.
+ */
+const disconnectDB = async () => {
+  if (prisma) {
+    await prisma.$disconnect();
+    isConnected = false;
+  }
+};
+
+/**
+ * Returns current database health status.
+ */
+const getDBStatus = async () => {
+  try {
+    if (!isConnected) {
+      await prisma.$connect();
+      isConnected = true;
+    }
+    // Simple ping query
+    await prisma.$queryRaw`SELECT 1`;
+    return { isConnected: true, status: 'healthy' };
+  } catch (err) {
+    return { isConnected: false, status: 'unreachable', error: err.message };
+  }
+};
 
 module.exports = {
+  prisma,
   connectDB,
+  disconnectDB,
   getDBStatus,
 };

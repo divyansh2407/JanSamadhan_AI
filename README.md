@@ -40,10 +40,11 @@ JanSamadhan (meaning *"People's Solution"* in Hindi) is an intelligent civic eng
 |------------|---------|
 | Node.js ≥ 18 | JavaScript runtime |
 | Express.js | HTTP framework |
-| MongoDB | Document database |
-| Mongoose | ODM / schema layer |
-| JWT | Authentication tokens |
+| PostgreSQL | Primary relational database |
+| Prisma ORM | Type-safe SQL ORM & migrations |
+| JWT | Authentication tokens & session cookies |
 | bcryptjs | Password hashing |
+| xAI Grok API | AI civic categorization engine (Stage 7 scaffold) |
 
 ### Development
 | Technology | Purpose |
@@ -149,19 +150,64 @@ cd server && npm run dev
 
 ## Available API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/health` | Server health check |
+### Health Check
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| `GET` | `/api/health` | Public | Server & PostgreSQL status |
 
-### Health Check Response
-```json
-{
-  "success": true,
-  "message": "JanSamadhan API is running",
-  "timestamp": "2026-11-03T08:00:00.000Z",
-  "environment": "development",
-  "version": "1.0.0"
-}
+### Authentication APIs
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| `POST` | `/api/auth/register` | Public (Rate-limited) | Register new citizen account (CITIZEN role enforced) |
+| `POST` | `/api/auth/login` | Public (Rate-limited) | Login & issue HTTP-only cookie and JWT |
+| `POST` | `/api/auth/logout` | Public | Terminate session & clear auth cookie |
+| `GET` | `/api/auth/me` | Authenticated | Retrieve authenticated user profile |
+
+### User APIs
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| `GET` | `/api/users/me` | Authenticated | Current user profile with activity stats |
+| `GET` | `/api/users/:id` | Authenticated | User profile by ID (sensitive fields stripped) |
+| `PATCH` | `/api/users/me` | Authenticated | Update name or phone number |
+
+### Department APIs
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| `GET` | `/api/departments` | Public | List departments (filters: city, state, active) |
+| `GET` | `/api/departments/:id` | Public | Department details with case counts |
+| `POST` | `/api/departments` | `SUPER_ADMIN`, `GOVERNMENT` | Register a new administrative department |
+| `PATCH` | `/api/departments/:id` | `SUPER_ADMIN`, `GOVERNMENT` | Update department details |
+
+### Category APIs
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| `GET` | `/api/categories` | Public | List active civic categories with case counts |
+| `POST` | `/api/categories` | `SUPER_ADMIN` | Create a new civic problem category |
+
+### Problem APIs
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| `GET` | `/api/problems` | Public | Paginated list (filters: category, status, severity, city) |
+| `GET` | `/api/problems/:id` | Public | Full problem report details with history |
+| `POST` | `/api/problems` | Authenticated | Submit a new civic problem report |
+| `PATCH` | `/api/problems/:id` | Author / Authority | Update report (author if SUBMITTED; authority for status/triage) |
+| `DELETE` | `/api/problems/:id` | Author / Admin | Delete report (author if SUBMITTED; or `SUPER_ADMIN`) |
+
+---
+
+## Database Seeding & Migrations
+
+```bash
+# Apply schema to PostgreSQL
+cd server
+npx prisma db push
+# or run migrations
+npx prisma migrate dev --name init
+
+# Seed categories idempotently
+npm run seed
+# or
+npx prisma db seed
 ```
 
 ---
@@ -174,9 +220,11 @@ Copy `server/.env.example` to `server/.env`. **Never commit `.env`.**
 |----------|----------|-------------|
 | `NODE_ENV` | Yes | `development` \| `production` |
 | `PORT` | Yes | Backend HTTP port (default: 5000) |
-| `CORS_ORIGIN` | Yes | Allowed frontend origin |
-| `MONGO_URI` | Stage 2+ | MongoDB connection string |
-| `JWT_SECRET` | Stage 2+ | JWT signing secret |
+| `DATABASE_URL` | Yes | PostgreSQL connection string (`postgresql://user:pass@host:5432/db`) |
+| `JWT_SECRET` | Yes | JWT signing secret (min 32 characters) |
+| `JWT_EXPIRES_IN` | Optional | JWT expiration window (default: `7d`) |
+| `CLIENT_URL` | Yes | Allowed frontend origin for CORS and credentials |
+| `XAI_API_KEY` | Stage 7 | xAI Grok API key for civic intelligence |
 | `GROK_API_KEY` | Stage 3+ | Grok AI API key |
 
 ---
