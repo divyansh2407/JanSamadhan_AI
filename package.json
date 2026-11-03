@@ -9,6 +9,7 @@
     "dev:server": "npm run dev --prefix server",
     "install:all": "npm install && npm install --prefix client && npm install --prefix server",
     "build": "npm run build --prefix client",
+    "start": "node server/server.js",
     "test:server": "npm run test --prefix server",
     "seed:server": "npm run seed --prefix server"
   },

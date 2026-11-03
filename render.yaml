@@ -1,0 +1,26 @@
+services:
+  # ── Fullstack Web Service ───────────────────────────────────────────────────
+  - type: web
+    name: jansamadhan-app
+    env: node
+    plan: free
+    buildCommand: "npm install && npm run build --prefix client && cd server && npm install && npx prisma generate"
+    startCommand: "cd server && npx prisma db push && node server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: DATABASE_URL
+        fromDatabase:
+          name: jansamadhan-db
+          property: connectionString
+
+# ── Managed PostgreSQL Database ───────────────────────────────────────────────
+databases:
+  - name: jansamadhan-db
+    plan: free
+    databaseName: jansamadhan
+    user: jansamadhan_user

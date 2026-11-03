@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # ── PostgreSQL Database ─────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: jansamadhan-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: jansamadhan
+      POSTGRES_USER: jansamadhan_user
+      POSTGRES_PASSWORD: jansamadhan_secure_password_2026
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jansamadhan_user -d jansamadhan"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Fullstack Web Application ───────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jansamadhan-app
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      DATABASE_URL: "postgresql://jansamadhan_user:jansamadhan_secure_password_2026@postgres:5432/jansamadhan?schema=public"
+      JWT_SECRET: "jansamadhan_super_secret_production_jwt_key_2026_xyz"
+      JWT_EXPIRES_IN: "7d"
+      CORS_ORIGIN: "*"
+    ports:
+      - "5000:5000"
+    volumes:
+      - app_uploads:/app/server/public/uploads
+
+volumes:
+  postgres_data:
+  app_uploads:

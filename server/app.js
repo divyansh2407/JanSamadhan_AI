@@ -101,6 +101,16 @@ app.use('/api/*', (req, res) => {
   });
 });
 
+// ── Production Frontend Static Serving (SPA fallback) ───────────────────────
+const clientDistPath = path.join(__dirname, '../client/dist');
+const fs = require('fs');
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+}
+
 // ── Centralized Error Handler ────────────────────────────────────────────────
 app.use(errorHandler);
 
