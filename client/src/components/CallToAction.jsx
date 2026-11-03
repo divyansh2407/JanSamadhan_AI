@@ -16,8 +16,8 @@ export default function CallToAction() {
           style={{ background: 'linear-gradient(135deg, #12304A 0%, #0B1F33 60%, #0d3d20 100%)' }}
         >
           {/* Decorative blobs */}
-          <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-green-DEFAULT/15 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-green-DEFAULT/10 blur-2xl pointer-events-none" />
+          <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-green/15 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-green/10 blur-2xl pointer-events-none" />
 
           {/* Grid pattern */}
           <div
@@ -73,7 +73,7 @@ export default function CallToAction() {
             >
               <button
                 onClick={() => scrollTo('#categories')}
-                className="inline-flex items-center justify-center gap-2 bg-green-DEFAULT hover:bg-green-600 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-base"
+                className="inline-flex items-center justify-center gap-2 bg-green hover:bg-green-600 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl text-base"
               >
                 Join JanSamadhan
                 <ArrowRight className="w-5 h-5" />

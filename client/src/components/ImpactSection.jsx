@@ -70,7 +70,7 @@ const METRICS = [
 
 export default function ImpactSection() {
   return (
-    <section id="impact" className="py-20 lg:py-28 bg-navy-DEFAULT relative overflow-hidden">
+    <section id="impact" className="py-20 lg:py-28 bg-navy relative overflow-hidden">
 
       {/* Decorative background pattern */}
       <div
@@ -80,8 +80,8 @@ export default function ImpactSection() {
           backgroundSize:  '32px 32px',
         }}
       />
-      <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-green-DEFAULT/10 blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-green-DEFAULT/5 blur-2xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-green/10 blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-green/5 blur-2xl pointer-events-none" />
 
       <div className="section-container relative z-10">
 

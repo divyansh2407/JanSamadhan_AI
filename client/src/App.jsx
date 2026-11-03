@@ -1,16 +1,18 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
+import PlaceholderAuth from './pages/PlaceholderAuth';
 
 /**
  * App – Root application component.
- * All page-level routing is defined here.
- * Additional routes will be added in later stages.
+ * Configures top-level routing for JanSamadhan.
  */
 function App() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
-      {/* Stage 2+: auth, dashboard, reports, admin routes */}
+      <Route path="/login" element={<PlaceholderAuth mode="Login" />} />
+      <Route path="/register" element={<PlaceholderAuth mode="Register" />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

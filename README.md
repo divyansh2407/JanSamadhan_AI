@@ -33,6 +33,7 @@ JanSamadhan (meaning *"People's Solution"* in Hindi) is an intelligent civic eng
 | React Router DOM v6 | Client-side routing |
 | Axios | HTTP client |
 | Lucide React | Icon library |
+| Framer Motion | Smooth UI & scroll animations |
 
 ### Backend
 | Technology | Purpose |

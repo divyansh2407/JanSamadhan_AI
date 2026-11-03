@@ -28,7 +28,7 @@ body {
 
   /* Buttons */
   .btn-primary {
-    @apply inline-flex items-center gap-2 bg-green-DEFAULT hover:bg-green-600
+    @apply inline-flex items-center gap-2 bg-green hover:bg-green-600
            text-white font-semibold px-6 py-3 rounded-lg
            transition-all duration-200 shadow-sm hover:shadow-md
            focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2
@@ -37,14 +37,14 @@ body {
 
   .btn-secondary {
     @apply inline-flex items-center gap-2 bg-white hover:bg-civic-bg
-           text-navy-DEFAULT border border-civic-border font-semibold
+           text-navy border border-civic-border font-semibold
            px-6 py-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md
-           focus:outline-none focus:ring-2 focus:ring-navy-DEFAULT focus:ring-offset-2;
+           focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2;
   }
 
   .btn-outline-white {
     @apply inline-flex items-center gap-2 border-2 border-white text-white
-           hover:bg-white hover:text-navy-DEFAULT font-semibold
+           hover:bg-white hover:text-navy font-semibold
            px-6 py-3 rounded-lg transition-all duration-200
            focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2;
   }
@@ -62,13 +62,13 @@ body {
 
   /* Section label pill */
   .section-label {
-    @apply inline-flex items-center gap-2 bg-green-light text-green-DEFAULT
+    @apply inline-flex items-center gap-2 bg-green-light text-green
            text-xs font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4;
   }
 
   /* Section heading */
   .section-heading {
-    @apply text-3xl sm:text-4xl font-bold text-navy-DEFAULT leading-tight mb-4;
+    @apply text-3xl sm:text-4xl font-bold text-navy leading-tight mb-4;
   }
 
   .section-subheading {

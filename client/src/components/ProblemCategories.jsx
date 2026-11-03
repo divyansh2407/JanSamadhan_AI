@@ -118,7 +118,7 @@ export default function ProblemCategories() {
               </div>
 
               {/* Content */}
-              <h3 className="text-base font-bold text-navy-DEFAULT mb-2 group-hover:text-green-DEFAULT transition-colors">
+              <h3 className="text-base font-bold text-navy mb-2 group-hover:text-green transition-colors">
                 {title}
               </h3>
               <p className="text-sm text-civic-secondary leading-relaxed mb-4">
@@ -126,7 +126,7 @@ export default function ProblemCategories() {
               </p>
 
               {/* Report CTA */}
-              <span className="inline-flex items-center gap-1 text-xs font-semibold text-green-DEFAULT opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-green opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 Report Issue <ArrowRight size={12} />
               </span>
             </motion.div>
@@ -141,8 +141,8 @@ export default function ProblemCategories() {
           transition={{ delay: 0.3 }}
           className="text-center text-sm text-civic-secondary mt-10"
         >
-          Don't see your category?{' '}
-          <button className="text-green-DEFAULT font-semibold hover:underline focus:outline-none">
+          Don&apos;t see your category?{' '}
+          <button className="text-green font-semibold hover:underline focus:outline-none">
             Report as Other Issue
           </button>
         </motion.p>

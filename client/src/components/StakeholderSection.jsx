@@ -128,7 +128,7 @@ export default function StakeholderSection() {
                 <div className={`w-1 h-10 rounded-full ${accent} opacity-20 group-hover:opacity-60 transition-opacity`} />
               </div>
 
-              <h3 className="text-base font-bold text-navy-DEFAULT mb-0.5">{title}</h3>
+              <h3 className="text-base font-bold text-navy mb-0.5">{title}</h3>
               <p className={`text-xs font-semibold ${color} mb-3`}>{role}</p>
               <p className="text-sm text-civic-secondary leading-relaxed flex-1 mb-5">{desc}</p>
 
@@ -149,7 +149,7 @@ export default function StakeholderSection() {
           {/* ── "Join Us" filler card on large screens ─────────────── */}
           <motion.div
             variants={cardVariants}
-            className="hidden lg:flex card p-6 items-center justify-center bg-navy-DEFAULT text-white text-center"
+            className="hidden lg:flex card p-6 items-center justify-center bg-navy text-white text-center"
           >
             <div>
               <div className="w-12 h-12 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center mx-auto mb-4">

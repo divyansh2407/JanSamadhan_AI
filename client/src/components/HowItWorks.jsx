@@ -43,9 +43,9 @@ const STEPS = [
     icon:   CheckCheck,
     title:  'Implementation & Resolution',
     desc:   'Solutions are implemented on the ground. Citizens receive updates and confirm resolution through the platform.',
-    color:  'text-navy-DEFAULT',
-    bg:     'bg-navy-DEFAULT/5',
-    border: 'border-navy-DEFAULT/20',
+    color:  'text-navy',
+    bg:     'bg-navy/5',
+    border: 'border-navy/20',
   },
 ];
 
@@ -114,14 +114,14 @@ export default function HowItWorks() {
                           <step.icon className={`w-5 h-5 ${step.color}`} />
                         </div>
                       </div>
-                      <h3 className="text-base font-bold text-navy-DEFAULT mb-2">{step.title}</h3>
+                      <h3 className="text-base font-bold text-navy mb-2">{step.title}</h3>
                       <p className="text-sm text-civic-secondary leading-relaxed">{step.desc}</p>
                     </div>
                   </div>
 
                   {/* Center dot on the timeline line */}
                   <div
-                    className={`hidden lg:flex absolute left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-green-DEFAULT border-4 border-white shadow-sm z-10`}
+                    className={`hidden lg:flex absolute left-1/2 -translate-x-1/2 w-5 h-5 rounded-full bg-green border-4 border-white shadow-sm z-10`}
                     style={{ top: '50%', transform: 'translate(-50%, -50%)' }}
                   />
 

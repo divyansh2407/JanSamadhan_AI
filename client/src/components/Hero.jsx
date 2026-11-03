@@ -11,10 +11,10 @@ function StatBadge({ value, label, icon: Icon, delay, className = '' }) {
       className={`absolute bg-white rounded-2xl shadow-card border border-civic-border px-4 py-3 flex items-center gap-3 ${className}`}
     >
       <div className="w-9 h-9 rounded-xl bg-green-light flex items-center justify-center flex-shrink-0">
-        <Icon className="w-4.5 h-4.5 text-green-DEFAULT" size={18} />
+        <Icon className="w-4.5 h-4.5 text-green" size={18} />
       </div>
       <div>
-        <p className="text-sm font-bold text-navy-DEFAULT leading-none">{value}</p>
+        <p className="text-sm font-bold text-navy leading-none">{value}</p>
         <p className="text-[11px] text-civic-secondary mt-0.5">{label}</p>
       </div>
     </motion.div>
@@ -30,7 +30,7 @@ function CityIllustration() {
       <motion.div
         animate={{ scale: [1, 1.04, 1] }}
         transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-        className="relative z-10 w-36 h-36 rounded-full bg-navy-DEFAULT flex flex-col items-center justify-center shadow-2xl border-4 border-white"
+        className="relative z-10 w-36 h-36 rounded-full bg-navy flex flex-col items-center justify-center shadow-2xl border-4 border-white"
       >
         <div className="text-white text-center">
           <div className="text-2xl font-bold">JS</div>
@@ -39,8 +39,8 @@ function CityIllustration() {
       </motion.div>
 
       {/* Orbit rings */}
-      <div className="absolute w-64 h-64 rounded-full border-2 border-dashed border-green-DEFAULT/20 animate-spin" style={{ animationDuration: '30s' }} />
-      <div className="absolute w-96 h-96 rounded-full border border-dashed border-navy-DEFAULT/10 animate-spin" style={{ animationDuration: '50s', animationDirection: 'reverse' }} />
+      <div className="absolute w-64 h-64 rounded-full border-2 border-dashed border-green/20 animate-spin" style={{ animationDuration: '30s' }} />
+      <div className="absolute w-96 h-96 rounded-full border border-dashed border-navy/10 animate-spin" style={{ animationDuration: '50s', animationDirection: 'reverse' }} />
 
       {/* Stakeholder nodes on the orbit */}
       {[
@@ -130,9 +130,9 @@ export default function Hero() {
               initial={{ opacity: 0, y: -12 }}
               animate={{ opacity: 1, y:   0 }}
               transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 bg-green-light border border-green-DEFAULT/20 text-green-DEFAULT text-xs font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full mb-6"
+              className="inline-flex items-center gap-2 bg-green-light border border-green/20 text-green text-xs font-semibold uppercase tracking-widest px-4 py-1.5 rounded-full mb-6"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-green-DEFAULT animate-pulse-soft" />
+              <span className="w-1.5 h-1.5 rounded-full bg-green animate-pulse-soft" />
               AI-Powered Civic Platform
             </motion.div>
 
@@ -141,10 +141,10 @@ export default function Hero() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y:  0 }}
               transition={{ duration: 0.65, delay: 0.1 }}
-              className="text-4xl sm:text-5xl xl:text-6xl font-bold text-navy-DEFAULT leading-[1.1] tracking-tight mb-6"
+              className="text-4xl sm:text-5xl xl:text-6xl font-bold text-navy leading-[1.1] tracking-tight mb-6"
             >
               Building Smarter Cities Through{' '}
-              <span className="text-green-DEFAULT">Collective Action.</span>
+              <span className="text-green">Collective Action.</span>
             </motion.h1>
 
             {/* Supporting text */}
@@ -192,7 +192,7 @@ export default function Hero() {
                 { icon: Zap,    text: 'AI-Powered Analysis' },
               ].map(({ icon: Icon, text }) => (
                 <span key={text} className="flex items-center gap-1.5">
-                  <Icon className="w-4 h-4 text-green-DEFAULT" size={16} />
+                  <Icon className="w-4 h-4 text-green" size={16} />
                   {text}
                 </span>
               ))}
@@ -216,7 +216,7 @@ export default function Hero() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.2 }}
           onClick={scrollToHow}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-civic-secondary hover:text-navy-DEFAULT transition-colors"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-civic-secondary hover:text-navy transition-colors"
           aria-label="Scroll to How It Works"
         >
           <span className="text-xs font-medium">Scroll to explore</span>

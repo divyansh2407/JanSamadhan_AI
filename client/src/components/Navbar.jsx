@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, Building2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Menu, X, Building2 } from 'lucide-react';
 
 const NAV_LINKS = [
   { label: 'Home',         href: '#home' },
@@ -55,12 +55,12 @@ export default function Navbar() {
             onClick={(e) => handleNavClick(e, '#home')}
             className="flex items-center gap-2.5 group flex-shrink-0"
           >
-            <div className="w-9 h-9 rounded-xl bg-navy-DEFAULT flex items-center justify-center shadow-sm">
+            <div className="w-9 h-9 rounded-xl bg-navy flex items-center justify-center shadow-sm">
               <Building2 className="w-5 h-5 text-white" />
             </div>
             <div className="leading-tight">
-              <span className="block text-base font-bold text-navy-DEFAULT tracking-tight">
-                Jan<span className="text-green-DEFAULT">Samadhan</span>
+              <span className="block text-base font-bold text-navy tracking-tight">
+                Jan<span className="text-green">Samadhan</span>
               </span>
               <span className="block text-[10px] font-medium text-civic-secondary tracking-widest uppercase">
                 Civic Platform
@@ -77,8 +77,8 @@ export default function Navbar() {
                 onClick={(e) => handleNavClick(e, link.href)}
                 className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-colors duration-150 ${
                   activeLink === link.href
-                    ? 'text-green-DEFAULT bg-green-light'
-                    : 'text-civic-secondary hover:text-navy-DEFAULT hover:bg-civic-bg'
+                    ? 'text-green bg-green-light'
+                    : 'text-civic-secondary hover:text-navy hover:bg-civic-bg'
                 }`}
               >
                 {link.label}
@@ -90,13 +90,13 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-3">
             <Link
               to="/login"
-              className="px-4 py-2 text-sm font-semibold text-navy-DEFAULT rounded-lg hover:bg-civic-bg transition-colors duration-150"
+              className="px-4 py-2 text-sm font-semibold text-navy rounded-lg hover:bg-civic-bg transition-colors duration-150"
             >
               Login
             </Link>
             <Link
               to="/register"
-              className="px-4 py-2 text-sm font-semibold text-white bg-green-DEFAULT hover:bg-green-600 rounded-lg transition-colors duration-150 shadow-sm"
+              className="px-4 py-2 text-sm font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors duration-150 shadow-sm"
             >
               Get Started
             </Link>
@@ -105,7 +105,7 @@ export default function Navbar() {
           {/* ── Mobile hamburger ─────────────────────────────────────── */}
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="lg:hidden p-2 rounded-lg text-civic-secondary hover:text-navy-DEFAULT hover:bg-civic-bg transition-colors duration-150"
+            className="lg:hidden p-2 rounded-lg text-civic-secondary hover:text-navy hover:bg-civic-bg transition-colors duration-150"
             aria-label={isOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={isOpen}
           >
@@ -126,7 +126,7 @@ export default function Navbar() {
               key={link.label}
               href={link.href}
               onClick={(e) => handleNavClick(e, link.href)}
-              className="px-4 py-2.5 rounded-lg text-sm font-medium text-civic-secondary hover:text-navy-DEFAULT hover:bg-civic-bg transition-colors duration-150"
+              className="px-4 py-2.5 rounded-lg text-sm font-medium text-civic-secondary hover:text-navy hover:bg-civic-bg transition-colors duration-150"
             >
               {link.label}
             </a>
@@ -134,14 +134,14 @@ export default function Navbar() {
           <div className="flex gap-3 pt-3 border-t border-civic-border mt-2">
             <Link
               to="/login"
-              className="flex-1 text-center px-4 py-2.5 text-sm font-semibold text-navy-DEFAULT border border-civic-border rounded-lg hover:bg-civic-bg transition-colors duration-150"
+              className="flex-1 text-center px-4 py-2.5 text-sm font-semibold text-navy border border-civic-border rounded-lg hover:bg-civic-bg transition-colors duration-150"
               onClick={() => setIsOpen(false)}
             >
               Login
             </Link>
             <Link
               to="/register"
-              className="flex-1 text-center px-4 py-2.5 text-sm font-semibold text-white bg-green-DEFAULT hover:bg-green-600 rounded-lg transition-colors duration-150"
+              className="flex-1 text-center px-4 py-2.5 text-sm font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors duration-150"
               onClick={() => setIsOpen(false)}
             >
               Get Started

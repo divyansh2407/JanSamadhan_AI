@@ -41,8 +41,8 @@ const FEATURES = [
     icon:  BarChart3,
     title: 'Impact Analytics',
     desc:  'Governance dashboards show resolution rates, department performance, and city-wide civic health metrics in one view.',
-    color: 'text-navy-DEFAULT',
-    bg:    'bg-navy-DEFAULT/5',
+    color: 'text-navy',
+    bg:    'bg-navy/5',
   },
 ];
 
@@ -109,7 +109,7 @@ export default function Features() {
               <div className={`w-11 h-11 rounded-xl ${bg} flex items-center justify-center mb-5 transition-transform duration-300 group-hover:scale-110`}>
                 <Icon className={`w-5 h-5 ${color}`} />
               </div>
-              <h3 className="text-sm font-bold text-navy-DEFAULT mb-2 group-hover:text-green-DEFAULT transition-colors">
+              <h3 className="text-sm font-bold text-navy mb-2 group-hover:text-green transition-colors">
                 {title}
               </h3>
               <p className="text-sm text-civic-secondary leading-relaxed">{desc}</p>
