@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import {
   Search,
@@ -15,6 +16,8 @@ import {
   Calendar,
   MapPin,
   RefreshCw,
+  ExternalLink,
+  ArrowUpDown,
 } from 'lucide-react';
 import StatusBadge from './StatusBadge';
 
@@ -30,6 +33,7 @@ export default function ReportsTable({
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
+  const [sortOrder, setSortOrder] = useState('desc');
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -37,6 +41,7 @@ export default function ReportsTable({
       search: searchTerm,
       status: selectedStatus,
       categoryId: selectedCategory,
+      order: sortOrder,
     });
   };
 
@@ -46,6 +51,7 @@ export default function ReportsTable({
       search: searchTerm,
       status,
       categoryId: selectedCategory,
+      order: sortOrder,
     });
   };
 
@@ -55,6 +61,17 @@ export default function ReportsTable({
       search: searchTerm,
       status: selectedStatus,
       categoryId,
+      order: sortOrder,
+    });
+  };
+
+  const handleSortChange = (order) => {
+    setSortOrder(order);
+    onFilterChange({
+      search: searchTerm,
+      status: selectedStatus,
+      categoryId: selectedCategory,
+      order,
     });
   };
 
@@ -62,7 +79,8 @@ export default function ReportsTable({
     setSearchTerm('');
     setSelectedStatus('');
     setSelectedCategory('');
-    onFilterChange({ search: '', status: '', categoryId: '' });
+    setSortOrder('desc');
+    onFilterChange({ search: '', status: '', categoryId: '', order: 'desc' });
   };
 
   return (
@@ -122,7 +140,20 @@ export default function ReportsTable({
               </div>
             )}
 
-            {(searchTerm || selectedStatus || selectedCategory) && (
+            {/* Sort Dropdown */}
+            <div className="relative">
+              <select
+                value={sortOrder}
+                onChange={(e) => handleSortChange(e.target.value)}
+                className="text-xs font-semibold py-2 pl-3 pr-8 rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green-600 appearance-none cursor-pointer"
+              >
+                <option value="desc">Newest First</option>
+                <option value="asc">Oldest First</option>
+              </select>
+              <ArrowUpDown className="w-3.5 h-3.5 text-civic-secondary absolute right-2.5 top-3 pointer-events-none" />
+            </div>
+
+            {(searchTerm || selectedStatus || selectedCategory || sortOrder !== 'desc') && (
               <button
                 onClick={handleReset}
                 className="text-xs text-civic-secondary hover:text-civic-text p-2 rounded-xl hover:bg-gray-100 flex items-center gap-1 transition-colors"
@@ -184,6 +215,7 @@ export default function ReportsTable({
                   <th className="py-3 px-5">Problem Title</th>
                   <th className="py-3 px-5">Category</th>
                   <th className="py-3 px-5">Location</th>
+                  <th className="py-3 px-5">Department</th>
                   <th className="py-3 px-5">Submitted</th>
                   <th className="py-3 px-5">Status</th>
                   <th className="py-3 px-5 text-right">Actions</th>
@@ -209,6 +241,9 @@ export default function ReportsTable({
                     <td className="py-3.5 px-5 text-xs text-civic-secondary max-w-[180px] truncate">
                       {report.address ? `${report.address}, ${report.city}` : report.city}
                     </td>
+                    <td className="py-3.5 px-5 text-xs text-civic-secondary max-w-[140px] truncate">
+                      {report.assignedDepartment?.name || 'Triage Pending'}
+                    </td>
                     <td className="py-3.5 px-5 text-xs text-civic-secondary font-mono">
                       {new Date(report.createdAt).toLocaleDateString('en-IN', {
                         day: 'numeric',
@@ -220,13 +255,22 @@ export default function ReportsTable({
                       <StatusBadge status={report.status} />
                     </td>
                     <td className="py-3.5 px-5 text-right">
-                      <button
-                        onClick={() => onViewDetails(report)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 hover:bg-green-100 text-civic-text hover:text-green-800 transition-colors"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        Details
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => onViewDetails(report)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-gray-100 hover:bg-green-100 text-civic-text hover:text-green-800 transition-colors"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Details</span>
+                        </button>
+                        <Link
+                          to={`/track?id=${report.trackingNumber || report.id}`}
+                          className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-green-50 hover:bg-green-100 text-green-800 transition-colors border border-green-200"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Track</span>
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -264,13 +308,22 @@ export default function ReportsTable({
                   </span>
                 </div>
 
-                <button
-                  onClick={() => onViewDetails(report)}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold bg-gray-100 hover:bg-green-100 text-civic-text hover:text-green-800 transition-colors"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  View Status Timeline
-                </button>
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                  <button
+                    onClick={() => onViewDetails(report)}
+                    className="flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold bg-gray-100 hover:bg-green-100 text-civic-text hover:text-green-800 transition-colors"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    Details
+                  </button>
+                  <Link
+                    to={`/track?id=${report.trackingNumber || report.id}`}
+                    className="flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold bg-green-50 hover:bg-green-100 text-green-800 border border-green-200 transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    Track Report
+                  </Link>
+                </div>
               </div>
             ))}
           </div>

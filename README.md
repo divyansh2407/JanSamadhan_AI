@@ -184,6 +184,21 @@ cd server && npm run dev
 | `GET` | `/api/categories` | Public | List active civic categories with case counts |
 | `POST` | `/api/categories` | `SUPER_ADMIN` | Create a new civic problem category |
 
+### Reports & Complaint Intake APIs
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| `POST` | `/api/reports` | Authenticated | Submit civic complaint, generate tracking ID (`JS-YYYY-XXXXXXX`), and dispatch confirmation email |
+| `GET` | `/api/reports/my-reports` | Authenticated | Citizen's own submitted complaints with search, category/status filters, and sorting |
+| `GET` | `/api/reports/:trackingId` | Owner / Authority | Full complaint details with status history and department assignment |
+| `GET` | `/api/reports/track/:trackingId` | Public | Zero-PII public tracking view for citizens and external inquiries |
+
+### Citizen Dashboard APIs
+| Method | Endpoint | Access | Description |
+|--------|----------|--------|-------------|
+| `GET` | `/api/dashboard/stats` | Authenticated | 5 KPI metrics (Total, Pending, Under Review, In Progress, Resolved) |
+| `GET` | `/api/citizen/dashboard` | Authenticated (CITIZEN) | Dashboard summary, recent activity stream, and notification counts |
+| `GET` | `/api/citizen/reports` | Authenticated (CITIZEN) | Paginated, filterable civic reports table |
+
 ### Problem APIs
 | Method | Endpoint | Access | Description |
 |--------|----------|--------|-------------|
@@ -192,6 +207,42 @@ cd server && npm run dev
 | `POST` | `/api/problems` | Authenticated | Submit a new civic problem report |
 | `PATCH` | `/api/problems/:id` | Author / Authority | Update report (author if SUBMITTED; authority for status/triage) |
 | `DELETE` | `/api/problems/:id` | Author / Admin | Delete report (author if SUBMITTED; or `SUPER_ADMIN`) |
+
+---
+
+## Automated Test Suites
+
+JanSamadhan includes comprehensive, automated test suites verifying all stages and security requirements:
+
+```bash
+cd server
+
+# 1. Master Authentication & Complaint Management Verification Suite (70/70 assertions)
+node test-auth-complaint-suite.js
+
+# 2. Stage-by-Stage Verification Suites
+node test-stage4-suite.js   # PostgreSQL & Backend Foundation
+node test-stage5-suite.js   # Citizen Dashboard & RBAC
+node test-stage6-suite.js   # Citizen Reporting & Anonymous Intake
+node test-stage7-suite.js   # Grok AI Analysis & Human Review
+node test-stage8-suite.js   # Interactive Civic Maps & Geospatial Intelligence
+node test-stage9-suite.js   # Government Administration & Department Assignment
+node test-stage11-suite.js  # Multi-Stakeholder Collaboration Platform
+node test-stage12-suite.js  # Solution Proposals & Implementation Tasks
+node test-stage13-suite.js  # Civic Analytics & Impact Measurement
+```
+
+For complete technical specifications, see [docs/AUTH_AND_COMPLAINT_FLOW.md](docs/AUTH_AND_COMPLAINT_FLOW.md).
+
+---
+
+## Email Confirmation Service
+
+JanSamadhan includes an automated, resilient email notification engine (`server/services/emailService.js`):
+- **Resend API**: Set `RESEND_API_KEY=re_...` in `server/.env`.
+- **SMTP**: Configure `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`.
+- **Local / Test Development**: If no API key is set, automatically formats and logs the branded email to the server console with zero errors or disruption to complaint submission.
+- **Resilience**: Email sending is non-blocking — network outages or provider timeouts will never fail a citizen's complaint submission.
 
 ---
 

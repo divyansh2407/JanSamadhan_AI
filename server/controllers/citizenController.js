@@ -10,6 +10,15 @@
  */
 
 const { prisma } = require('../config/db');
+const offlineStore = require('../config/offlineStore');
+
+function isDbOffline(err) {
+  return (
+    err.code === 'P1001' ||
+    err.name?.includes('Prisma') ||
+    (err.message && err.message.includes("Can't reach database server"))
+  );
+}
 
 
 /**
@@ -18,13 +27,14 @@ const { prisma } = require('../config/db');
  * @access  Private (CITIZEN, SUPER_ADMIN)
  */
 const getCitizenDashboardSummary = async (req, res, next) => {
+  const citizenId = req.user?.id;
   try {
-    const citizenId = req.user.id;
 
     // Aggregate statistics strictly for the authenticated citizen
     const [
       totalReports,
       pendingReports,
+      underReviewReports,
       inProgressReports,
       resolvedReports,
       recentReports,
@@ -43,7 +53,15 @@ const getCitizenDashboardSummary = async (req, res, next) => {
           status: { in: ['SUBMITTED', 'ACKNOWLEDGED'] },
         },
       }),
-      // 3. In Progress reports
+      // 3. Under review reports
+      prisma.problem.count({
+        where: {
+          reportedBy: citizenId,
+          isAnonymous: false,
+          status: 'UNDER_REVIEW',
+        },
+      }),
+      // 4. In Progress reports
       prisma.problem.count({
         where: {
           reportedBy: citizenId,
@@ -51,7 +69,7 @@ const getCitizenDashboardSummary = async (req, res, next) => {
           status: 'IN_PROGRESS',
         },
       }),
-      // 4. Resolved reports
+      // 5. Resolved reports
       prisma.problem.count({
         where: {
           reportedBy: citizenId,
@@ -122,6 +140,7 @@ const getCitizenDashboardSummary = async (req, res, next) => {
         statistics: {
           totalReports,
           pendingReports,
+          underReviewReports,
           inProgressReports,
           resolvedReports,
         },
@@ -143,6 +162,31 @@ const getCitizenDashboardSummary = async (req, res, next) => {
       },
     });
   } catch (error) {
+    if (isDbOffline(error)) {
+      const stats = offlineStore.getUserStats(citizenId);
+      const recentReports = offlineStore.getUserProblems(citizenId).slice(0, 5);
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        offline: true,
+        data: {
+          user: {
+            id: req.user.id,
+            name: req.user.name,
+            email: req.user.email,
+            phone: req.user.phone,
+            role: req.user.role,
+          },
+          statistics: stats,
+          recentReports,
+          recentActivity: [],
+          notifications: {
+            unreadCount: 0,
+            items: [],
+          },
+        },
+      });
+    }
     next(error);
   }
 };
@@ -153,22 +197,22 @@ const getCitizenDashboardSummary = async (req, res, next) => {
  * @access  Private (CITIZEN, SUPER_ADMIN)
  */
 const getCitizenReports = async (req, res, next) => {
+  const citizenId = req.user?.id;
+  const {
+    page = 1,
+    limit = 10,
+    search,
+    status,
+    categoryId,
+    sortBy = 'createdAt',
+    order = 'desc',
+  } = req.query || {};
+
+  const pageNum = Math.max(1, parseInt(page, 10) || 1);
+  const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 10));
+  const skip = (pageNum - 1) * limitNum;
+
   try {
-    const citizenId = req.user.id;
-    const {
-      page = 1,
-      limit = 10,
-      search,
-      status,
-      categoryId,
-      sortBy = 'createdAt',
-      order = 'desc',
-    } = req.query;
-
-    const pageNum = Math.max(1, parseInt(page, 10) || 1);
-    const limitNum = Math.min(50, Math.max(1, parseInt(limit, 10) || 10));
-    const skip = (pageNum - 1) * limitNum;
-
     // Strict boundary: Only non-anonymous reports belonging to the authenticated citizen
     const where = {
       reportedBy: citizenId,
@@ -186,6 +230,7 @@ const getCitizenReports = async (req, res, next) => {
     if (search && search.trim().length > 0) {
       const searchTerm = search.trim();
       where.OR = [
+        { trackingNumber: { contains: searchTerm, mode: 'insensitive' } },
         { title: { contains: searchTerm, mode: 'insensitive' } },
         { description: { contains: searchTerm, mode: 'insensitive' } },
         { address: { contains: searchTerm, mode: 'insensitive' } },
@@ -235,6 +280,32 @@ const getCitizenReports = async (req, res, next) => {
       },
     });
   } catch (error) {
+    if (isDbOffline(error)) {
+      const offlineReports = offlineStore.getUserProblems(citizenId, {
+        search,
+        status,
+        categoryId,
+        order,
+      });
+      const total = offlineReports.length;
+      const paged = offlineReports.slice(skip, skip + limitNum);
+      const totalPages = Math.ceil(total / limitNum) || 1;
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        offline: true,
+        data: {
+          pagination: {
+            total,
+            page: pageNum,
+            limit: limitNum,
+            totalPages,
+            hasMore: pageNum < totalPages,
+          },
+          reports: paged,
+        },
+      });
+    }
     next(error);
   }
 };
@@ -246,12 +317,14 @@ const getCitizenReports = async (req, res, next) => {
  * @security IDOR Protection: Checks that problem belongs to authenticated citizen
  */
 const getCitizenReportById = async (req, res, next) => {
+  const citizenId = req.user?.id;
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    const citizenId = req.user.id;
 
-    const report = await prisma.problem.findUnique({
-      where: { id },
+    const report = await prisma.problem.findFirst({
+      where: {
+        OR: [{ id }, { trackingNumber: id }],
+      },
       include: {
         category: true,
         assignedDepartment: true,
@@ -309,6 +382,29 @@ const getCitizenReportById = async (req, res, next) => {
       data: { report },
     });
   } catch (error) {
+    if (isDbOffline(error)) {
+      const report = offlineStore.findProblem(id);
+      if (!report) {
+        return res.status(404).json({
+          success: false,
+          statusCode: 404,
+          message: 'Civic report not found',
+        });
+      }
+      if (report.reportedBy !== citizenId && req.user.role !== 'SUPER_ADMIN') {
+        return res.status(403).json({
+          success: false,
+          statusCode: 403,
+          message: 'Access denied. You are not authorized to view this report.',
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        offline: true,
+        data: { report },
+      });
+    }
     next(error);
   }
 };
@@ -319,8 +415,8 @@ const getCitizenReportById = async (req, res, next) => {
  * @access  Private (CITIZEN, SUPER_ADMIN)
  */
 const getCitizenActivityStream = async (req, res, next) => {
+  const citizenId = req.user?.id;
   try {
-    const citizenId = req.user.id;
     const { page = 1, limit = 20 } = req.query;
 
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
@@ -369,6 +465,17 @@ const getCitizenActivityStream = async (req, res, next) => {
       },
     });
   } catch (error) {
+    if (isDbOffline(error)) {
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        offline: true,
+        data: {
+          pagination: { total: 0, page: 1, limit: 10, totalPages: 1 },
+          activities: [],
+        },
+      });
+    }
     next(error);
   }
 };
@@ -379,8 +486,8 @@ const getCitizenActivityStream = async (req, res, next) => {
  * @access  Private (CITIZEN, SUPER_ADMIN)
  */
 const getCitizenNotifications = async (req, res, next) => {
+  const citizenId = req.user?.id;
   try {
-    const citizenId = req.user.id;
     const { page = 1, limit = 20 } = req.query;
 
     const pageNum = Math.max(1, parseInt(page, 10) || 1);
@@ -418,6 +525,18 @@ const getCitizenNotifications = async (req, res, next) => {
       },
     });
   } catch (error) {
+    if (isDbOffline(error)) {
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        offline: true,
+        data: {
+          pagination: { total: 0, page: 1, limit: 20, totalPages: 1 },
+          notifications: [],
+          unreadCount: 0,
+        },
+      });
+    }
     next(error);
   }
 };
@@ -428,9 +547,9 @@ const getCitizenNotifications = async (req, res, next) => {
  * @access  Private (CITIZEN, SUPER_ADMIN)
  */
 const markNotificationRead = async (req, res, next) => {
+  const citizenId = req.user?.id;
+  const { id } = req.params;
   try {
-    const { id } = req.params;
-    const citizenId = req.user.id;
 
     const notification = await prisma.notification.findUnique({
       where: { id },
@@ -463,6 +582,14 @@ const markNotificationRead = async (req, res, next) => {
       data: { notification: updated },
     });
   } catch (error) {
+    if (isDbOffline(error)) {
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        offline: true,
+        data: { notification: { id, isRead: true } },
+      });
+    }
     next(error);
   }
 };
@@ -473,8 +600,8 @@ const markNotificationRead = async (req, res, next) => {
  * @access  Private (CITIZEN, SUPER_ADMIN)
  */
 const getCitizenProfile = async (req, res, next) => {
+  const citizenId = req.user?.id;
   try {
-    const citizenId = req.user.id;
 
     const [user, totalReports, resolvedReports] = await Promise.all([
       prisma.user.findUnique({
@@ -527,6 +654,33 @@ const getCitizenProfile = async (req, res, next) => {
       },
     });
   } catch (error) {
+    if (isDbOffline(error)) {
+      const stats = offlineStore.getUserStats(citizenId);
+      return res.status(200).json({
+        success: true,
+        statusCode: 200,
+        offline: true,
+        data: {
+          profile: {
+            id: req.user.id,
+            name: req.user.name || 'Citizen',
+            email: req.user.email,
+            phone: req.user.phone || null,
+            role: req.user.role || 'CITIZEN',
+            isActive: true,
+            isVerified: false,
+            createdAt: new Date(),
+            totalReportsSubmitted: stats.totalReports,
+            resolvedReportsCount: stats.resolvedReports,
+            resolutionRate:
+              stats.totalReports > 0
+                ? Math.round((stats.resolvedReports / stats.totalReports) * 100)
+                : 0,
+            profileCompletionPercentage: 80,
+          },
+        },
+      });
+    }
     next(error);
   }
 };

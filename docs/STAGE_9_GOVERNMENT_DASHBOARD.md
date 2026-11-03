@@ -22,3 +22,4 @@ The Government Administration Portal provides municipal authorities with a centr
 
 ## 4. Automated Verification Test Suite
 - Test Suite: `server/test-stage9-suite.js` (14/14 tests passing)
+

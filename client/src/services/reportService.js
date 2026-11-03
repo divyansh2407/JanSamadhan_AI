@@ -37,7 +37,37 @@ export const reportService = {
    * Submit problem as an authenticated citizen
    */
   async submitRegisteredReport(problemData) {
-    const response = await api.post('/problems', problemData);
+    try {
+      const response = await api.post('/reports', problemData);
+      return response.data?.data || response.data;
+    } catch (err) {
+      // Fallback to /problems if /reports fails
+      const fallbackRes = await api.post('/problems', problemData);
+      return fallbackRes.data?.data || fallbackRes.data;
+    }
+  },
+
+  /**
+   * Get authenticated citizen's submitted reports
+   */
+  async getMyReports(params = {}) {
+    const response = await api.get('/reports/my-reports', { params });
+    return response.data?.data || response.data;
+  },
+
+  /**
+   * Get report details by tracking ID
+   */
+  async getReportByTrackingId(trackingId) {
+    const response = await api.get(`/reports/${encodeURIComponent(trackingId)}`);
+    return response.data?.data || response.data;
+  },
+
+  /**
+   * Get user dashboard overview stats
+   */
+  async getDashboardStats() {
+    const response = await api.get('/dashboard/stats');
     return response.data?.data || response.data;
   },
 

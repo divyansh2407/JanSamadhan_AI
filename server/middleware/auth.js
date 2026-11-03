@@ -89,7 +89,19 @@ const authenticate = async (req, res, next) => {
         dbError.name?.includes('Prisma') ||
         (dbError.message && dbError.message.includes("Can't reach database server"))
       ) {
-        req.user = sanitizeUser(decoded);
+        let fallbackUser = decoded;
+        try {
+          const offlineStore = require('../config/offlineStore');
+          const matched =
+            offlineStore.findUserById(decoded.id) ||
+            offlineStore.findUserByEmail(decoded.email);
+          if (matched) {
+            fallbackUser = matched;
+          }
+        } catch (e) {
+          // Ignore offline store lookup failures
+        }
+        req.user = sanitizeUser(fallbackUser);
         return next();
       }
       throw dbError;

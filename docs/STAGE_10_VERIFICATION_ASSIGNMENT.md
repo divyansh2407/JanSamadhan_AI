@@ -19,3 +19,4 @@ Stage 10 implements the official municipal decision-making and assignment workfl
 
 ## 3. Audit Trail
 All state-modifying actions automatically write an immutable record to `GovAuditLog`.
+

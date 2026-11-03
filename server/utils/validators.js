@@ -31,7 +31,7 @@ const validateRegistrationInput = ({ name, email, phone, password }) => {
     errors.push('A valid email address is required');
   }
 
-  if (!phone || !validatePhone(phone)) {
+  if (phone && phone.trim().length > 0 && !validatePhone(phone)) {
     errors.push('A valid phone number is required');
   }
 

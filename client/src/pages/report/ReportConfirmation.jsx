@@ -232,10 +232,10 @@ https://jansamadhan.gov.in/track?id=${encodeURIComponent(trackingId)}
               <div className="p-5 rounded-2xl bg-green-50/70 border border-green-200 text-left space-y-2 text-xs">
                 <div className="flex items-center gap-2 font-bold text-green-950">
                   <CheckCircle2 className="w-4 h-4 text-green-700" />
-                  <span>Linked to Your Citizen Account</span>
+                  <span>Linked to Your Citizen Account & Confirmation Dispatched</span>
                 </div>
                 <p className="text-green-900 leading-relaxed">
-                  This report has been automatically attached to your citizen profile. You can monitor progress, field inspection reports, and resolution evidence directly inside your Citizen Dashboard.
+                  This report has been automatically attached to your citizen profile and a confirmation email has been dispatched. You can monitor progress, field inspection reports, and resolution evidence directly inside your Citizen Dashboard.
                 </p>
               </div>
             )}

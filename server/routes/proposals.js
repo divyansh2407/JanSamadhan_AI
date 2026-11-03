@@ -27,3 +27,4 @@ router.post('/', authenticate, createProposal);
 router.patch('/:id/status', authenticate, authorize('GOVERNMENT', 'SUPER_ADMIN'), updateProposalStatus);
 
 module.exports = router;
+

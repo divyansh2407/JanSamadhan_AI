@@ -27,6 +27,8 @@ const governmentRoutes = require('./routes/government');
 const collaborationRoutes = require('./routes/collaborations');
 const proposalRoutes = require('./routes/proposals');
 const analyticsRoutes = require('./routes/analytics');
+const reportRoutes = require('./routes/reports');
+const dashboardRoutes = require('./routes/dashboard');
 
 
 
@@ -85,6 +87,8 @@ app.use('/api/government', governmentRoutes);
 app.use('/api/collaborations', collaborationRoutes);
 app.use('/api/proposals', proposalRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 
 

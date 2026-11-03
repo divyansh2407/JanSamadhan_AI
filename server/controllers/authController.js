@@ -5,12 +5,21 @@
 
 const bcrypt = require('bcryptjs');
 const { prisma } = require('../config/db');
+const offlineStore = require('../config/offlineStore');
 const { sendTokenResponse, clearTokenCookie } = require('../utils/jwt');
 const { sanitizeUser } = require('../middleware/auth');
 const {
   validateRegistrationInput,
   validateLoginInput,
 } = require('../utils/validators');
+
+function isDbOffline(err) {
+  return (
+    err.code === 'P1001' ||
+    err.name?.includes('Prisma') ||
+    (err.message && err.message.includes("Can't reach database server"))
+  );
+}
 
 /**
  * @route   POST /api/auth/register
@@ -35,9 +44,18 @@ const register = async (req, res, next) => {
     const normalizedEmail = email.toLowerCase().trim();
 
     // Prevent duplicate email registration
-    const existingUser = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
+    let existingUser = null;
+    try {
+      existingUser = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+      });
+    } catch (err) {
+      if (isDbOffline(err)) {
+        existingUser = offlineStore.findUserByEmail(normalizedEmail);
+      } else {
+        throw err;
+      }
+    }
 
     if (existingUser) {
       return res.status(400).json({
@@ -51,15 +69,30 @@ const register = async (req, res, next) => {
     const passwordHash = await bcrypt.hash(password, salt);
 
     // SECURITY: Never trust role from frontend in public registration
-    const newUser = await prisma.user.create({
-      data: {
-        name: name.trim(),
-        email: normalizedEmail,
-        phone: phone.trim(),
-        passwordHash,
-        role: 'CITIZEN', // STRICT ENFORCEMENT
-      },
-    });
+    let newUser;
+    try {
+      newUser = await prisma.user.create({
+        data: {
+          name: name.trim(),
+          email: normalizedEmail,
+          phone: phone ? phone.trim() : null,
+          passwordHash,
+          role: 'CITIZEN', // STRICT ENFORCEMENT
+        },
+      });
+    } catch (createErr) {
+      if (isDbOffline(createErr)) {
+        newUser = offlineStore.createUser({
+          name: name.trim(),
+          email: normalizedEmail,
+          phone: phone ? phone.trim() : null,
+          passwordHash,
+          role: 'CITIZEN',
+        });
+      } else {
+        throw createErr;
+      }
+    }
 
     sendTokenResponse(
       sanitizeUser(newUser),
@@ -93,10 +126,19 @@ const login = async (req, res, next) => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
-    // Look up user from PostgreSQL
-    const user = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
+    // Look up user from PostgreSQL (or offline store)
+    let user = null;
+    try {
+      user = await prisma.user.findUnique({
+        where: { email: normalizedEmail },
+      });
+    } catch (err) {
+      if (isDbOffline(err)) {
+        user = offlineStore.findUserByEmail(normalizedEmail);
+      } else {
+        throw err;
+      }
+    }
 
     if (!user) {
       return res.status(401).json({

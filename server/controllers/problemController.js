@@ -6,6 +6,7 @@
 const crypto = require('crypto');
 const { prisma } = require('../config/db');
 const { analyzeProblemAsync } = require('../services/aiAnalysisService');
+const { sendComplaintConfirmationEmail } = require('../services/emailService');
 
 
 const VALID_STATUSES = ['SUBMITTED', 'ACKNOWLEDGED', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'];
@@ -320,6 +321,22 @@ const createProblem = async (req, res, next) => {
       analyzeProblemAsync(newProblem.id);
     } catch (aiErr) {
       console.warn('AI trigger failed (non-blocking):', aiErr.message);
+    }
+
+    // Asynchronously dispatch confirmation email
+    if (req.user?.email) {
+      sendComplaintConfirmationEmail({
+        recipientEmail: req.user.email,
+        recipientName: req.user.name,
+        problemId: newProblem.id,
+        trackingId: trackingNumber,
+        title: newProblem.title,
+        category: newProblem.category?.name || 'Civic Infrastructure',
+        location: `${newProblem.address}, ${newProblem.city}`,
+        status: newProblem.status,
+      }).catch((emailErr) => {
+        console.warn('Email dispatch failed (non-blocking):', emailErr.message);
+      });
     }
 
     res.status(201).json({

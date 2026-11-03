@@ -19,9 +19,13 @@ const registerSchema = z
     phone: z
       .string()
       .trim()
-      .regex(
-        /^[6-9]\d{9}$/,
-        'Phone must be a valid 10-digit Indian mobile number starting with 6-9'
+      .optional()
+      .nullable()
+      .refine(
+        (val) => !val || /^[6-9]\d{9}$/.test(val) || /^[0-9+() -]{7,20}$/.test(val),
+        {
+          message: 'Phone must be a valid mobile number',
+        }
       ),
     password: z
       .string()

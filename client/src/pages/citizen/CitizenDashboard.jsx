@@ -518,8 +518,8 @@ export default function CitizenDashboard() {
                 <div className="absolute right-0 bottom-0 translate-x-12 translate-y-12 w-64 h-64 rounded-full bg-white/5 pointer-events-none blur-2xl" />
               </div>
 
-              {/* 3.2 DASHBOARD STATISTICS (Section 6) */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {/* 3.2 DASHBOARD STATISTICS (Section 3) */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
                 <StatsCard
                   title="Total Reports"
                   count={dashboardData?.statistics?.totalReports}
@@ -527,17 +527,27 @@ export default function CitizenDashboard() {
                   accentColor="text-blue-700"
                   bgColor="bg-blue-50"
                   borderColor="border-blue-200"
-                  description="Lifetime complaints submitted"
+                  description="Lifetime complaints"
                   isLoading={isLoading}
                 />
                 <StatsCard
-                  title="Pending Review"
+                  title="Pending Reports"
                   count={dashboardData?.statistics?.pendingReports}
                   icon={Clock}
                   accentColor="text-amber-700"
                   bgColor="bg-amber-50"
                   borderColor="border-amber-200"
-                  description="Awaiting municipal verification"
+                  description="Awaiting triage"
+                  isLoading={isLoading}
+                />
+                <StatsCard
+                  title="Under Review"
+                  count={dashboardData?.statistics?.underReviewReports || 0}
+                  icon={Search}
+                  accentColor="text-purple-700"
+                  bgColor="bg-purple-50"
+                  borderColor="border-purple-200"
+                  description="In verification"
                   isLoading={isLoading}
                 />
                 <StatsCard
@@ -547,7 +557,7 @@ export default function CitizenDashboard() {
                   accentColor="text-emerald-700"
                   bgColor="bg-emerald-50"
                   borderColor="border-emerald-200"
-                  description="Work orders active in field"
+                  description="Field team deployed"
                   isLoading={isLoading}
                 />
                 <StatsCard
@@ -557,7 +567,7 @@ export default function CitizenDashboard() {
                   accentColor="text-green-700"
                   bgColor="bg-green-50"
                   borderColor="border-green-200"
-                  description="Verified repaired & completed"
+                  description="Verified completed"
                   isLoading={isLoading}
                 />
               </div>

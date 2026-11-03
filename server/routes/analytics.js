@@ -25,3 +25,4 @@ router.get('/proposals', authenticate, getProposalStats);
 router.get('/impact', authenticate, getImpactMetrics);
 
 module.exports = router;
+

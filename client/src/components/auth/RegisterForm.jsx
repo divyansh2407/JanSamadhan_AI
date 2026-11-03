@@ -48,8 +48,8 @@ export default function RegisterForm() {
     }
 
     const phoneRegex = /^[0-9+() -]{7,20}$/;
-    if (!formData.phone.trim() || !phoneRegex.test(formData.phone.trim())) {
-      return 'Please enter a valid phone number (e.g. +91 98765 43210).';
+    if (formData.phone.trim() && !phoneRegex.test(formData.phone.trim())) {
+      return 'Please enter a valid mobile number (e.g. +91 98765 43210).';
     }
 
     if (!formData.password || formData.password.length < 6) {
@@ -82,8 +82,10 @@ export default function RegisterForm() {
     const result = await register({
       name: formData.name.trim(),
       email: formData.email.trim(),
-      phone: formData.phone.trim(),
+      phone: formData.phone.trim() || undefined,
       password: formData.password,
+      confirmPassword: formData.confirmPassword,
+      termsAccepted: formData.agreeTerms,
     });
     setLoading(false);
 
@@ -168,10 +170,10 @@ export default function RegisterForm() {
         </div>
       </div>
 
-      {/* Phone Number */}
+      {/* Mobile Number (optional) */}
       <div>
         <label htmlFor="phone" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
-          Phone Number <span className="text-rose-500">*</span>
+          Mobile Number <span className="text-civic-secondary font-normal">(optional)</span>
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
@@ -182,7 +184,6 @@ export default function RegisterForm() {
             name="phone"
             type="tel"
             autoComplete="tel"
-            required
             value={formData.phone}
             onChange={handleChange}
             placeholder="+91 98765 43210"

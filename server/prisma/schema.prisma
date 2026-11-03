@@ -192,7 +192,7 @@ model User {
   id           String   @id @default(uuid())
   name         String
   email        String   @unique
-  phone        String
+  phone        String?
   passwordHash String
   role         UserRole @default(CITIZEN)
   isActive     Boolean  @default(true)
@@ -310,6 +310,7 @@ model Problem {
   officerAssignments    OfficerAssignment[]      @relation("ProblemOfficerAssignments")
   internalNotes         InternalNote[]           @relation("ProblemInternalNotes")
   govAuditLogs          GovAuditLog[]            @relation("ProblemGovAuditLogs")
+  emailNotifications    EmailNotification[]      @relation("ProblemEmailNotifications")
 
   @@index([city])
   @@index([status])
@@ -728,4 +729,25 @@ model GovAuditLog {
   @@index([problemId])
   @@index([action])
   @@map("gov_audit_logs")
+}
+
+/// Official confirmation and status update email notifications (Section 6 & 7)
+model EmailNotification {
+  id               String    @id @default(uuid())
+  problemId        String?
+  recipientEmail   String
+  notificationType String    // e.g. COMPLAINT_CONFIRMATION, STATUS_UPDATE
+  deliveryStatus   String    // SENT, FAILED, PENDING
+  sentAt           DateTime?
+  errorDetails     String?
+  metadata         Json?
+  createdAt        DateTime  @default(now())
+
+  // Relationships
+  problem Problem? @relation("ProblemEmailNotifications", fields: [problemId], references: [id], onDelete: SetNull)
+
+  @@index([problemId])
+  @@index([recipientEmail])
+  @@index([deliveryStatus])
+  @@map("email_notifications")
 }
