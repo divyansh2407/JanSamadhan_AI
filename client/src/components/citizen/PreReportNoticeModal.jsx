@@ -5,9 +5,11 @@
  */
 
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import { PlusCircle, X, MapPin, Camera, Sparkles, ArrowRight, Shield } from 'lucide-react';
 
 export default function PreReportNoticeModal({ isOpen, onClose }) {
+  const navigate = useNavigate();
   if (!isOpen) return null;
 
   return (
@@ -22,7 +24,7 @@ export default function PreReportNoticeModal({ isOpen, onClose }) {
             <div>
               <h3 className="text-base font-bold text-civic-text">Report a Civic Issue</h3>
               <p className="text-xs text-civic-secondary">
-                Stage 6 Intake Pipeline Specification
+                Stage 6 Intake Pipeline Active
               </p>
             </div>
           </div>
@@ -36,33 +38,33 @@ export default function PreReportNoticeModal({ isOpen, onClose }) {
 
         {/* Content */}
         <div className="p-6 space-y-4">
-          <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs space-y-1.5">
-            <div className="flex items-center gap-2 font-bold text-sm">
-              <Sparkles className="w-4 h-4 text-amber-600 shrink-0" />
-              Stage 6 Geo-Tagged Ingestion Engine
+          <div className="p-4 rounded-2xl bg-green-50 border border-green-200 text-green-900 text-xs space-y-1.5">
+            <div className="flex items-center gap-2 font-bold text-sm text-green-800">
+              <Sparkles className="w-4 h-4 text-green-600 shrink-0" />
+              Stage 6 Civic Intake Live
             </div>
             <p className="leading-relaxed">
-              The full-featured reporting interface with interactive OpenStreetMap pin placement, EXIF-sanitized multi-photo upload, and real-time Grok AI auto-categorization is scheduled for <strong>Stage 6</strong> per the Master Development Roadmap.
+              The full-featured reporting interface with interactive category cards, automatic EXIF-sanitized multi-photo upload, and registered or anonymous pipelines is now live.
             </p>
           </div>
 
           <div className="space-y-3 text-xs">
             <h4 className="font-bold text-civic-text uppercase tracking-wider text-[11px]">
-              What You Will Be Able to Report in Stage 6:
+              Available Features:
             </h4>
             <div className="grid grid-cols-1 gap-2.5">
               <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F8FAF8] border border-civic-border">
                 <MapPin className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-civic-text block">Interactive Ward & Street Pin</strong>
-                  Pinpoint exact pothole, water leakage, or streetlight location on high-resolution OpenStreetMap tiles.
+                  <strong className="text-civic-text block">GPS & Manual Location Tagging</strong>
+                  Detect coordinates with browser geolocation or select Ward and Landmark.
                 </div>
               </div>
               <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F8FAF8] border border-civic-border">
                 <Camera className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-civic-text block">Before / In-Progress / After Photographic Proof</strong>
-                  Upload high-resolution camera photos with automatic client-side EXIF stripping for privacy protection.
+                  <strong className="text-civic-text block">Photographic Proof (EXIF Purged)</strong>
+                  Upload up to 3 photos with automatic camera and GPS metadata sanitization.
                 </div>
               </div>
               <div className="flex items-start gap-2.5 p-3 rounded-xl bg-[#F8FAF8] border border-civic-border">
@@ -78,14 +80,21 @@ export default function PreReportNoticeModal({ isOpen, onClose }) {
 
         {/* Footer */}
         <div className="p-4 border-t border-civic-border bg-[#F8FAF8] flex items-center justify-between">
-          <span className="text-[11px] text-civic-secondary font-mono">
-            Roadmap: Stage 5 Dashboard Active
-          </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 text-xs font-semibold rounded-xl bg-green-600 hover:bg-green-700 text-white transition-colors"
+            className="px-4 py-2 text-xs font-semibold rounded-xl border border-civic-border text-civic-secondary hover:bg-gray-100 transition-colors"
           >
-            Understood
+            Close
+          </button>
+          <button
+            onClick={() => {
+              onClose();
+              navigate('/report');
+            }}
+            className="px-5 py-2 text-xs font-semibold rounded-xl bg-green-600 hover:bg-green-700 text-white transition-colors inline-flex items-center gap-1.5"
+          >
+            <span>Open Reporting Portal</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </div>

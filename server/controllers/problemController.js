@@ -3,7 +3,9 @@
  * Comprehensive civic issue submission, triage, filtering, and role-based updates.
  */
 
+const crypto = require('crypto');
 const { prisma } = require('../config/db');
+
 
 const VALID_STATUSES = ['SUBMITTED', 'ACKNOWLEDGED', 'IN_PROGRESS', 'RESOLVED', 'REJECTED'];
 const VALID_SEVERITIES = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'];
@@ -189,6 +191,7 @@ const createProblem = async (req, res, next) => {
       description,
       categoryId,
       address,
+      landmark,
       city,
       state,
       pincode,
@@ -198,7 +201,9 @@ const createProblem = async (req, res, next) => {
       severity = 'MEDIUM',
       priority = 'MEDIUM',
       imageUrl,
+      imageUrls = [],
     } = req.body;
+
 
 
     // Validation
@@ -242,15 +247,21 @@ const createProblem = async (req, res, next) => {
       ? priority.toUpperCase()
       : 'MEDIUM';
 
+    const currentYear = new Date().getFullYear();
+    const randomSuffix = crypto.randomBytes(3).toString('hex').toUpperCase();
+    const trackingNumber = `JS-${currentYear}-${randomSuffix}`;
+
     const newProblem = await prisma.$transaction(async (tx) => {
       const problem = await tx.problem.create({
         data: {
+          trackingNumber,
           title: title.trim(),
           description: description.trim(),
           categoryId,
           reportedBy: req.user.id,
           isAnonymous: false,
           address: address.trim(),
+          landmark: landmark ? landmark.trim() : null,
           city: city.trim(),
           state: state.trim(),
           pincode: pincode.trim(),
@@ -270,11 +281,20 @@ const createProblem = async (req, res, next) => {
         },
       });
 
-      if (imageUrl) {
+      // Handle single image or multiple images array
+      const allImages = [];
+      if (imageUrl) allImages.push(imageUrl);
+      if (Array.isArray(imageUrls)) {
+        imageUrls.forEach((url) => {
+          if (url && !allImages.includes(url)) allImages.push(url);
+        });
+      }
+
+      for (const imgUrl of allImages) {
         await tx.problemImage.create({
           data: {
             problemId: problem.id,
-            imageUrl,
+            imageUrl: imgUrl,
             stage: 'INTAKE',
             caption: 'Citizen uploaded evidence',
           },
@@ -298,7 +318,9 @@ const createProblem = async (req, res, next) => {
       success: true,
       message: 'Civic problem reported successfully',
       problem: newProblem,
+      trackingNumber,
     });
+
 
   } catch (error) {
     next(error);

@@ -9,6 +9,10 @@ import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import CitizenDashboard from '../pages/citizen/CitizenDashboard';
+import ReportEntryPage from '../pages/report/ReportEntryPage';
+import ReportProblemForm from '../pages/report/ReportProblemForm';
+import ReportConfirmation from '../pages/report/ReportConfirmation';
+import TrackReportPage from '../pages/report/TrackReportPage';
 import {
   GovernmentDashboard,
   UniversityDashboard,
@@ -17,7 +21,6 @@ import {
   AdminDashboard,
 } from '../pages/dashboards/RoleDashboard';
 
-
 export default function AppRoutes() {
   return (
     <Routes>
@@ -25,6 +28,12 @@ export default function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+
+      {/* ── Civic Reporting & Tracking Routes (Stage 6) ─────────────────── */}
+      <Route path="/report" element={<ReportEntryPage />} />
+      <Route path="/report/submit" element={<ReportProblemForm />} />
+      <Route path="/report/confirmation" element={<ReportConfirmation />} />
+      <Route path="/track" element={<TrackReportPage />} />
 
       {/* ── Protected Role Dashboards ───────────────────────────────────── */}
       <Route

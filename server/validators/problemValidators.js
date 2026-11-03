@@ -21,6 +21,7 @@ const createProblemSchema = z.object({
     .trim()
     .min(3, 'Address is required')
     .max(255, 'Address cannot exceed 255 characters'),
+  landmark: z.string().trim().max(255).optional().nullable(),
   city: z
     .string()
     .trim()
@@ -42,7 +43,9 @@ const createProblemSchema = z.object({
   longitude: z.number().min(-180).max(180).optional().nullable(),
   severity: z.enum(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL']).optional().default('MEDIUM'),
   priority: z.enum(['LOW', 'MEDIUM', 'HIGH', 'URGENT']).optional().default('MEDIUM'),
-  imageUrl: z.string().url('Invalid image URL format').optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
+  imageUrls: z.array(z.string()).optional().default([]),
+
 });
 
 const updateProblemSchema = z.object({

@@ -10,51 +10,67 @@ const prisma = new PrismaClient();
 
 const INITIAL_CATEGORIES = [
   {
-    name: 'Roads and Infrastructure',
-    description: 'Potholes, damaged pavements, bridge structural issues, and road cave-ins.',
+    name: 'Roads and Potholes',
+    description: 'Potholes, damaged pavements, road cave-ins, and unfinished asphalt work.',
     icon: 'Construction',
   },
   {
-    name: 'Waste Management',
-    description: 'Garbage dump overflow, illegal dumping, hazardous waste, and uncollected trash.',
+    name: 'Garbage and Waste Management',
+    description: 'Overflowing dumpsters, uncollected domestic waste, and illegal debris dumping.',
     icon: 'Trash2',
   },
   {
-    name: 'Water and Sanitation',
-    description: 'Pipeline leakage, water contamination, sewage overflows, and drainage blockages.',
+    name: 'Water Supply and Leakage',
+    description: 'Pipeline bursts, low water pressure, contaminated supply, and leaking public taps.',
     icon: 'Droplets',
   },
   {
+    name: 'Drainage and Sewage',
+    description: 'Blocked stormwater drains, sewage overflow, broken manhole covers, and backflow.',
+    icon: 'Waves',
+  },
+  {
     name: 'Electricity and Streetlights',
-    description: 'Dark streetlights, fallen electric poles, hanging cables, and power fluctuation hazards.',
+    description: 'Dark streetlights, leaning electric poles, sparking transformers, and dangling cables.',
     icon: 'Zap',
   },
   {
     name: 'Traffic and Transportation',
-    description: 'Faulty traffic signals, missing road signs, dangerous intersections, and transit congestion.',
+    description: 'Broken traffic lights, missing road signage, junction bottlenecks, and bus stop damage.',
     icon: 'Car',
   },
   {
-    name: 'Environment and Pollution',
-    description: 'Industrial smoke, noise pollution, open burning of waste, and water body pollution.',
-    icon: 'Leaf',
-  },
-  {
-    name: 'Public Safety',
-    description: 'Open manholes, uncovered trenches, structural safety hazards, and dark alleys.',
-    icon: 'ShieldAlert',
+    name: 'Air and Noise Pollution',
+    description: 'Industrial emissions, open garbage burning, and excessive construction noise.',
+    icon: 'Wind',
   },
   {
     name: 'Public Infrastructure',
-    description: 'Damaged municipal schools, public toilets, broken boundary walls, and parks.',
+    description: 'Damaged footbridges, municipal school buildings, cracked community walls, and barriers.',
     icon: 'Building2',
   },
   {
-    name: 'Other',
-    description: 'General civic concerns not covered by predefined categories.',
+    name: 'Public Safety',
+    description: 'Unlit dark corridors, open excavation trenches, abandoned structures, and stray hazards.',
+    icon: 'ShieldAlert',
+  },
+  {
+    name: 'Sanitation and Hygiene',
+    description: 'Unhygienic public toilets, stagnant vector breeding pools, and open defecation spots.',
+    icon: 'Sparkles',
+  },
+  {
+    name: 'Parks and Public Spaces',
+    description: 'Overgrown public parks, vandalized playground equipment, and damaged walking tracks.',
+    icon: 'Trees',
+  },
+  {
+    name: 'Other Civic Issues',
+    description: 'Civic grievances not covered under standard municipal classifications.',
     icon: 'HelpCircle',
   },
 ];
+
 
 async function seed() {
   console.log('🌱 Starting JanSamadhan PostgreSQL Database Seeding…\n');

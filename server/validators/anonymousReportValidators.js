@@ -24,6 +24,7 @@ const submitAnonymousReportSchema = z.object({
     .trim()
     .min(3, 'Address / Landmark is required')
     .max(255, 'Address cannot exceed 255 characters'),
+  landmark: z.string().trim().max(255).optional().nullable(),
   city: z
     .string()
     .trim()
@@ -43,7 +44,8 @@ const submitAnonymousReportSchema = z.object({
   wardId: z.string().uuid().optional().nullable(),
   latitude: z.number().min(-90).max(90).optional().nullable(),
   longitude: z.number().min(-180).max(180).optional().nullable(),
-  imageUrl: z.string().url('Invalid image URL format').optional().nullable(),
+  imageUrl: z.string().optional().nullable(),
+  imageUrls: z.array(z.string()).optional().default([]),
 });
 
 module.exports = {

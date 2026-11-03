@@ -97,42 +97,55 @@ export default function Navbar() {
 
           {/* ── Desktop CTA / User Profile ────────────────────────────── */}
           <div className="hidden lg:flex items-center gap-3">
+            <Link
+              to="/track"
+              className="px-3 py-1.5 text-xs font-semibold text-civic-secondary hover:text-navy hover:bg-civic-bg rounded-lg transition-colors"
+            >
+              Track Report
+            </Link>
+            <Link
+              to="/report"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-green hover:bg-green-600 rounded-xl transition-colors shadow-sm"
+            >
+              <span>Report Issue</span>
+            </Link>
+
             {isAuthenticated && user ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 pl-2 border-l border-civic-border">
                 <Link
                   to={getDashboardPath(user.role)}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-navy bg-civic-bg hover:bg-green-light hover:text-green border border-civic-border rounded-xl transition-all"
+                  className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-navy bg-civic-bg hover:bg-green-light hover:text-green border border-civic-border rounded-xl transition-all"
                 >
-                  <LayoutDashboard size={16} />
+                  <LayoutDashboard size={14} />
                   <span>Dashboard</span>
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-navy/10 text-navy uppercase">
+                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-navy/10 text-navy uppercase">
                     {user.role}
                   </span>
                 </Link>
                 <button
                   onClick={handleLogout}
-                  className="p-2 text-civic-secondary hover:text-rose-600 rounded-lg transition-colors"
+                  className="p-1.5 text-civic-secondary hover:text-rose-600 rounded-lg transition-colors"
                   title="Logout"
                   aria-label="Logout"
                 >
-                  <LogOut size={18} />
+                  <LogOut size={16} />
                 </button>
               </div>
             ) : (
-              <>
+              <div className="flex items-center gap-2 pl-2 border-l border-civic-border">
                 <Link
                   to="/login"
-                  className="px-4 py-2 text-sm font-semibold text-navy rounded-lg hover:bg-civic-bg transition-colors duration-150"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-navy rounded-lg hover:bg-civic-bg transition-colors duration-150"
                 >
                   Login
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 text-sm font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors duration-150 shadow-sm"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-navy bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-150"
                 >
-                  Get Started
+                  Register
                 </Link>
-              </>
+              </div>
             )}
           </div>
 
@@ -165,6 +178,23 @@ export default function Navbar() {
               {link.label}
             </a>
           ))}
+
+          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-civic-border">
+            <Link
+              to="/report"
+              onClick={() => setIsOpen(false)}
+              className="text-center px-3 py-2 text-xs font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors"
+            >
+              Report Issue
+            </Link>
+            <Link
+              to="/track"
+              onClick={() => setIsOpen(false)}
+              className="text-center px-3 py-2 text-xs font-semibold text-navy bg-civic-bg hover:bg-green-light rounded-lg transition-colors"
+            >
+              Track Report
+            </Link>
+          </div>
 
           <div className="pt-3 border-t border-civic-border mt-2">
             {isAuthenticated && user ? (

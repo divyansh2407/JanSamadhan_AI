@@ -28,5 +28,9 @@ router.post(
 // GET /api/public/reports/:trackingId - Track status with X-Tracking-Token
 router.get('/:trackingId', trackAnonymousReport);
 
+// POST /api/public/reports/track - Track status using request body { trackingId, secretToken }
+router.post('/track', trackAnonymousReport);
+
+
 module.exports = router;
 

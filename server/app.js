@@ -17,7 +17,10 @@ const departmentRoutes = require('./routes/departments');
 const categoryRoutes = require('./routes/categories');
 const problemRoutes = require('./routes/problems');
 const publicReportRoutes = require('./routes/publicReports');
+const path = require('path');
 const citizenRoutes = require('./routes/citizen');
+const uploadRoutes = require('./routes/upload');
+
 
 
 
@@ -55,6 +58,9 @@ app.use(cookieParser());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// ── Static Files (Uploaded Evidence Photographs) ───────────────────────────
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+
 // ── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api', healthRoutes);
 app.use('/api/auth', authRoutes);
@@ -64,6 +70,8 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/problems', problemRoutes);
 app.use('/api/public/reports', publicReportRoutes);
 app.use('/api/citizen', citizenRoutes);
+app.use('/api/upload', uploadRoutes);
+
 
 
 

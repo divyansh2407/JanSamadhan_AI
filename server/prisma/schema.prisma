@@ -208,6 +208,7 @@ model ProblemCategory {
 /// Core Civic Problems reported by citizens (registered or anonymous)
 model Problem {
   id                   String          @id @default(uuid())
+  trackingNumber       String?         @unique // e.g. JS-2026-A8K7P2
   title                String
   description          String
   categoryId           String
@@ -217,11 +218,13 @@ model Problem {
   wardId               String?
   assignedDepartmentId String?
   address              String
+  landmark             String?
   city                 String
   state                String
   pincode              String
   latitude             Float?
   longitude            Float?
+
   severity             ProblemSeverity @default(MEDIUM)
   priority             ProblemPriority @default(MEDIUM)
   status               ProblemStatus   @default(SUBMITTED)

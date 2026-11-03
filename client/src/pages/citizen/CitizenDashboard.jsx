@@ -379,7 +379,7 @@ export default function CitizenDashboard() {
           <div className="flex items-center gap-3">
             {/* Quick Action Button */}
             <button
-              onClick={() => setIsReportNoticeOpen(true)}
+              onClick={() => navigate('/report/submit?mode=registered')}
               className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs font-semibold shadow-sm transition-all"
             >
               <PlusCircle className="w-4 h-4" />
@@ -497,7 +497,7 @@ export default function CitizenDashboard() {
 
                   <div className="pt-4 flex flex-wrap items-center gap-3">
                     <button
-                      onClick={() => setIsReportNoticeOpen(true)}
+                      onClick={() => navigate('/report/submit?mode=registered')}
                       className="px-5 py-2.5 rounded-xl bg-white text-green-900 font-bold text-xs md:text-sm hover:bg-green-50 shadow-sm transition-all flex items-center gap-2"
                     >
                       <PlusCircle className="w-4 h-4 text-green-700" />
