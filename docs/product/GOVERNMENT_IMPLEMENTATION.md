@@ -159,3 +159,4 @@ Resistance to new software among junior field staff is mitigated through:
 * **Ultra-Simple Mobile Web UI:** Zero complex app installs required; mobile-friendly responsive web app works on budget Android smartphones ($< 2\text{ seconds}$ page load).
 * **Bilingual Interface:** Primary screens rendered in English and regional state language (e.g., Marathi, Kannada, Hindi).
 * **Positive Gamification:** Ward performance scorecards highlight top-performing Junior Engineers in monthly municipal reviews, fostering healthy civic competition.
+

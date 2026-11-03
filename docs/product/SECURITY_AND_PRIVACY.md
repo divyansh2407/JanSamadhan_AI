@@ -163,3 +163,4 @@ JanSamadhan is architected to be fully compliant with the **Digital Personal Dat
 * **Disaster Recovery RTO / RPO:**
   * Recovery Time Objective (RTO): $< 2\text{ hours}$
   * Recovery Point Objective (RPO): $< 15\text{ minutes}$ of data loss in catastrophic failure.
+

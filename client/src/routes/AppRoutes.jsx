@@ -8,14 +8,15 @@ import HomePage from '../pages/HomePage';
 import Login from '../pages/auth/Login';
 import Register from '../pages/auth/Register';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
+import CitizenDashboard from '../pages/citizen/CitizenDashboard';
 import {
-  CitizenDashboard,
   GovernmentDashboard,
   UniversityDashboard,
   ExpertDashboard,
   IndustryDashboard,
   AdminDashboard,
 } from '../pages/dashboards/RoleDashboard';
+
 
 export default function AppRoutes() {
   return (

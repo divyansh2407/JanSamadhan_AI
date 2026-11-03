@@ -240,3 +240,4 @@ The JanSamadhan platform roadmap is decomposed into **18 sequential, testable st
   * Automated multi-region database failover.
 * **Deliverables:** Production infrastructure Terraform/Docker configs, operational runbooks.
 * **Git Commit Requirement:** `deploy: High-availability multi-city production orchestration`
+

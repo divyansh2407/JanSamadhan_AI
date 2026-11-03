@@ -13,3 +13,4 @@ const createCategorySchema = z.object({
 module.exports = {
   createCategorySchema,
 };
+

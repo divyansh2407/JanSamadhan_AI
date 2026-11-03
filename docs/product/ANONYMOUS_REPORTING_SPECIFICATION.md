@@ -156,3 +156,4 @@ Anonymity must never be exploited to launch spam attacks, defame individuals, or
   * `DUPLICATE_SUBMISSION`: Identical hazard already logged under active maintenance.
   * `DEFAMATORY_CONTENT`: Contains personal attacks or non-civic grievances.
 * The rejection reason is immutably logged in `ProblemStatusHistory` and viewable when the citizen tracks the token.
+

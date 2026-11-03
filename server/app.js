@@ -17,6 +17,8 @@ const departmentRoutes = require('./routes/departments');
 const categoryRoutes = require('./routes/categories');
 const problemRoutes = require('./routes/problems');
 const publicReportRoutes = require('./routes/publicReports');
+const citizenRoutes = require('./routes/citizen');
+
 
 
 // Load environment variables
@@ -61,6 +63,8 @@ app.use('/api/departments', departmentRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/problems', problemRoutes);
 app.use('/api/public/reports', publicReportRoutes);
+app.use('/api/citizen', citizenRoutes);
+
 
 
 // 404 handler for unknown API routes

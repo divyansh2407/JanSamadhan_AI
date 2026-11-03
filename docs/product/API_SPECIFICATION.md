@@ -292,3 +292,4 @@
 * `GET /api/analytics/ward-performance`: Ward-wise MTTR, resolution rates, and SLA compliance.
 * `GET /api/analytics/heatmap`: GeoJSON point cloud for GIS heatmap rendering.
 * `GET /api/analytics/anonymous-stats`: Aggregated anonymous vs. registered reporting trends without deanonymization.
+

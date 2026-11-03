@@ -268,3 +268,4 @@ JanSamadhan is designed for cloud-native deployment with horizontal scaling:
 * **Backend:** Node.js Express cluster running on Render / Railway / AWS ECS container instances.
 * **Database:** Managed PostgreSQL (e.g., Supabase / Neon / AWS RDS) with automated daily backups, SSL connection enforcement, and connection pooling.
 * **Environment Configuration:** Strict separation of secrets via environment variables (`DATABASE_URL`, `JWT_SECRET`, `GROK_API_KEY`, `CORS_ORIGIN`).
+

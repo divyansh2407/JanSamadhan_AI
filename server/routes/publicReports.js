@@ -29,3 +29,4 @@ router.post(
 router.get('/:trackingId', trackAnonymousReport);
 
 module.exports = router;
+

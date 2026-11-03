@@ -78,9 +78,9 @@ const getDBStatus = async () => {
   }
 };
 
-module.exports = {
-  prisma,
-  connectDB,
-  disconnectDB,
-  getDBStatus,
-};
+module.exports = prisma;
+module.exports.prisma = prisma;
+module.exports.connectDB = connectDB;
+module.exports.disconnectDB = disconnectDB;
+module.exports.getDBStatus = getDBStatus;
+

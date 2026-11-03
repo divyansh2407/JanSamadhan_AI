@@ -460,3 +460,4 @@ enum VerificationStatus {
   * `ipAddressHash`: `String?`
   * `createdAt`: `DateTime` (Default: `now()`)
 * **Indexes:** `@@index([entityType, entityId])`, `@@index([createdAt])`
+

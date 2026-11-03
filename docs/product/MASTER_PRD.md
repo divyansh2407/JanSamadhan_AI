@@ -386,3 +386,4 @@ JanSamadhan integrates the **Grok API (xAI)** as a high-speed civic intelligence
 | **Accessibility** | WCAG 2.1 Level AA compliance | Axe-core accessibility auditing |
 | **Data Protection** | Full compliance with India's DPDP Act 2023 | Zero PII in anonymous tables, encrypted credentials at rest |
 | **Scalability** | Multi-city tenancy supporting $100\text{ Wards}$ and $100,000\text{ active reports}$ | PostgreSQL index optimization & connection pooling |
+

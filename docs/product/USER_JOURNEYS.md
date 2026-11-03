@@ -172,3 +172,4 @@ JanSamadhan serves seven distinct user personas across the civic problem-solving
    * Observes system latency ($P_{95} = 142\text{ ms}$).
 3. **Department Provisioning:** Provisions new municipal zone for expanding pilot to a neighboring city, configuring 15 new wards and department heads.
 4. **Audit Trail Review:** Inspects cryptographic activity logs to verify no unauthorized role escalation occurred.
+

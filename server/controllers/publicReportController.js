@@ -4,7 +4,8 @@
  */
 
 const crypto = require('crypto');
-const prisma = require('../config/db');
+const { prisma } = require('../config/db');
+
 
 /**
  * Submit an anonymous civic problem report
@@ -262,3 +263,4 @@ module.exports = {
   submitAnonymousReport,
   trackAnonymousReport,
 };
+
