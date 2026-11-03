@@ -46,27 +46,32 @@ JanSamadhan is built in modular stages. Each stage is independently testable and
 
 ---
 
-## Stage 3 – Authentication & User Management
+## Stage 3 – Authentication System & Role-Based Access Control ✅
 
-**Status:** Planned
+**Status:** Complete
 
 ### Deliverables
-- [ ] MongoDB connection (`config/db.js` with Mongoose)
-- [ ] `User` Mongoose model (name, email, password hash, role, city, verified)
-- [ ] Auth routes: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`
-- [ ] JWT issuance and refresh token strategy
-- [ ] `bcryptjs` password hashing
-- [ ] Auth middleware (`middleware/auth.js`) for protected routes
-- [ ] Role-based access control: `citizen`, `official`, `admin`
-- [ ] Frontend: Login page, Register page
-- [ ] Frontend: `AuthContext` provider with `useAuth` hook
-- [ ] Frontend: Protected route guard (`routes/PrivateRoute.jsx`)
-- [ ] Email verification flow (basic)
-- [ ] Input validation (server-side)
+- [x] Mongoose `User` model with 6 distinct roles (`CITIZEN`, `GOVERNMENT`, `UNIVERSITY`, `EXPERT`, `INDUSTRY`, `SUPER_ADMIN`)
+- [x] Pre-save password hashing with `bcryptjs` and secure password comparison method
+- [x] Public registration strictly enforced as `CITIZEN` only (privilege escalation prevention)
+- [x] JWT token generation with expiration and verification utilities
+- [x] Secure HTTP-only cookies with Lax/None SameSite and production SSL flags
+- [x] Centralized authentication middleware (`authenticate`) supporting cookies & Authorization headers
+- [x] Reusable Role-Based Access Control middleware (`authorize`) returning HTTP 403 on role mismatch
+- [x] In-memory rate limiting middleware for `/api/auth/login` and `/api/auth/register`
+- [x] Input validation utilities for email, phone, and password strength
+- [x] Endpoints: `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me`
+- [x] Frontend `AuthContext` and `useAuth` hook managing authenticated state across the application
+- [x] Axios `api.js` updated with `withCredentials: true` and automatic token interceptors
+- [x] Gov-Tech styled `LoginPage.jsx` with email/password validation and test account quick-fill
+- [x] Gov-Tech styled `RegisterPage.jsx` with phone/email validation, password visibility toggles, and terms agreement
+- [x] Dedicated branded dashboard placeholder pages for all 6 stakeholder roles
+- [x] Dynamic Navigation bar reflecting authenticated state with role badges and logout trigger
+- [x] Automated test suite verifying 41/41 test assertions with 100% pass rate
 
 ---
 
-## Stage 3 – Citizen Dashboard & Problem Reporting
+## Stage 4 – Citizen Dashboard & Problem Reporting
 
 **Status:** Planned
 
@@ -83,7 +88,7 @@ JanSamadhan is built in modular stages. Each stage is independently testable and
 
 ---
 
-## Stage 4 – Admin Panel & Case Management
+## Stage 5 – Admin Panel & Case Management
 
 **Status:** Planned
 

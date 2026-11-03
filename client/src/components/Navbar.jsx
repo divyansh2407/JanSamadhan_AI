@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, X, Building2 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, X, Building2, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
 
 const NAV_LINKS = [
   { label: 'Home',         href: '#home' },
@@ -11,9 +12,11 @@ const NAV_LINKS = [
 ];
 
 export default function Navbar() {
-  const [isOpen,      setIsOpen]      = useState(false);
-  const [scrolled,   setScrolled]    = useState(false);
-  const [activeLink, setActiveLink]  = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeLink, setActiveLink] = useState('');
+  const { user, isAuthenticated, logout, getDashboardPath } = useAuth();
+  const navigate = useNavigate();
 
   // Track scroll for shadow + background effect
   useEffect(() => {
@@ -37,6 +40,12 @@ export default function Navbar() {
     const target = document.querySelector(href);
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, []);
+
+  const handleLogout = async () => {
+    setIsOpen(false);
+    await logout();
+    navigate('/');
+  };
 
   return (
     <header
@@ -86,20 +95,45 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* ── Desktop CTA buttons ───────────────────────────────────── */}
+          {/* ── Desktop CTA / User Profile ────────────────────────────── */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link
-              to="/login"
-              className="px-4 py-2 text-sm font-semibold text-navy rounded-lg hover:bg-civic-bg transition-colors duration-150"
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="px-4 py-2 text-sm font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors duration-150 shadow-sm"
-            >
-              Get Started
-            </Link>
+            {isAuthenticated && user ? (
+              <div className="flex items-center gap-3">
+                <Link
+                  to={getDashboardPath(user.role)}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-semibold text-navy bg-civic-bg hover:bg-green-light hover:text-green border border-civic-border rounded-xl transition-all"
+                >
+                  <LayoutDashboard size={16} />
+                  <span>Dashboard</span>
+                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-navy/10 text-navy uppercase">
+                    {user.role}
+                  </span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="p-2 text-civic-secondary hover:text-rose-600 rounded-lg transition-colors"
+                  title="Logout"
+                  aria-label="Logout"
+                >
+                  <LogOut size={18} />
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-sm font-semibold text-navy rounded-lg hover:bg-civic-bg transition-colors duration-150"
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-4 py-2 text-sm font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors duration-150 shadow-sm"
+                >
+                  Get Started
+                </Link>
+              </>
+            )}
           </div>
 
           {/* ── Mobile hamburger ─────────────────────────────────────── */}
@@ -131,25 +165,54 @@ export default function Navbar() {
               {link.label}
             </a>
           ))}
-          <div className="flex gap-3 pt-3 border-t border-civic-border mt-2">
-            <Link
-              to="/login"
-              className="flex-1 text-center px-4 py-2.5 text-sm font-semibold text-navy border border-civic-border rounded-lg hover:bg-civic-bg transition-colors duration-150"
-              onClick={() => setIsOpen(false)}
-            >
-              Login
-            </Link>
-            <Link
-              to="/register"
-              className="flex-1 text-center px-4 py-2.5 text-sm font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors duration-150"
-              onClick={() => setIsOpen(false)}
-            >
-              Get Started
-            </Link>
+
+          <div className="pt-3 border-t border-civic-border mt-2">
+            {isAuthenticated && user ? (
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 px-2 py-1 text-xs text-civic-secondary">
+                  <User size={14} className="text-green" />
+                  <span className="font-semibold text-navy">{user.name}</span>
+                  <span className="text-[10px] uppercase font-bold text-green bg-green-light px-2 py-0.5 rounded">
+                    {user.role}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <Link
+                    to={getDashboardPath(user.role)}
+                    className="flex-1 text-center px-4 py-2 text-xs font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Open Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="px-3 py-2 text-xs font-semibold text-rose-600 bg-rose-50 hover:bg-rose-100 rounded-lg transition-colors"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex gap-3">
+                <Link
+                  to="/login"
+                  className="flex-1 text-center px-4 py-2.5 text-sm font-semibold text-navy border border-civic-border rounded-lg hover:bg-civic-bg transition-colors duration-150"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+                <Link
+                  to="/register"
+                  className="flex-1 text-center px-4 py-2.5 text-sm font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors duration-150"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Get Started
+                </Link>
+              </div>
+            )}
           </div>
         </nav>
       </div>
     </header>
   );
 }
-

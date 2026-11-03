@@ -1,14 +1,15 @@
 /**
  * JanSamadhan – Axios API Client (services/api.js)
- * Central Axios instance used by all service modules.
- * Base URL is read from the Vite env var VITE_API_URL (falls back to /api).
+ * Configured with credentials support for HTTP-only cookie authentication
+ * and automatic Bearer token header fallback.
  */
 
 import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
-  timeout: 10000,
+  timeout: 15000,
+  withCredentials: true, // Send HTTP-only session cookies
   headers: {
     'Content-Type': 'application/json',
   },
@@ -17,7 +18,7 @@ const api = axios.create({
 // ── Request interceptor ──────────────────────────────────────────────────────
 api.interceptors.request.use(
   (config) => {
-    // Attach JWT token when available (Stage 2+)
+    // Attach localStorage JWT if present (dual-layer cookie + header auth)
     const token = localStorage.getItem('js_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -31,8 +32,12 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // Token expired – Stage 2 will handle redirect to login
+    // Don't auto-clear on /api/auth/me failure during initial app load
+    if (
+      error.response?.status === 401 &&
+      !error.config?.url?.includes('/auth/me') &&
+      !error.config?.url?.includes('/auth/login')
+    ) {
       localStorage.removeItem('js_token');
     }
     return Promise.reject(error);
