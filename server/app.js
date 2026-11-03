@@ -23,6 +23,10 @@ const uploadRoutes = require('./routes/upload');
 const aiRoutes = require('./routes/ai');
 const mapRoutes = require('./routes/map');
 const locationRoutes = require('./routes/location');
+const governmentRoutes = require('./routes/government');
+const collaborationRoutes = require('./routes/collaborations');
+const proposalRoutes = require('./routes/proposals');
+const analyticsRoutes = require('./routes/analytics');
 
 
 
@@ -77,6 +81,10 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/ai', aiRoutes);
 app.use('/api/map', mapRoutes);
 app.use('/api/location', locationRoutes);
+app.use('/api/government', governmentRoutes);
+app.use('/api/collaborations', collaborationRoutes);
+app.use('/api/proposals', proposalRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 
 

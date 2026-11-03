@@ -197,3 +197,4 @@ export function createPinPickerIcon() {
     iconAnchor: [17, 34],
   });
 }
+

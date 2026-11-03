@@ -32,3 +32,4 @@ router.get('/wards', getWardStatistics);
 router.get('/summary', getMapSummary);
 
 module.exports = router;
+

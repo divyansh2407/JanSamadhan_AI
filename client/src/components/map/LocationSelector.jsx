@@ -288,3 +288,4 @@ LocationSelector.propTypes = {
   onChange: PropTypes.func.isRequired,
   city: PropTypes.string,
 };
+

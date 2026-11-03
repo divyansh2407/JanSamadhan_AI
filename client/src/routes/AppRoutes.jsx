@@ -15,8 +15,13 @@ import ReportConfirmation from '../pages/report/ReportConfirmation';
 import TrackReportPage from '../pages/report/TrackReportPage';
 import CityMapExplorerPage from '../pages/map/CityMapExplorerPage';
 import AIAnalysisPreviewPage from '../pages/dashboards/AIAnalysisPreviewPage';
+import GovernmentDashboard from '../pages/dashboards/GovernmentDashboard';
+import CollaborationsPage from '../pages/collaborations/CollaborationsPage';
+import CollaborationDetailPage from '../pages/collaborations/CollaborationDetailPage';
+import ProposalsPage from '../pages/proposals/ProposalsPage';
+import SubmitProposalPage from '../pages/proposals/SubmitProposalPage';
+import AnalyticsDashboard from '../pages/analytics/AnalyticsDashboard';
 import {
-  GovernmentDashboard,
   UniversityDashboard,
   ExpertDashboard,
   IndustryDashboard,
@@ -92,6 +97,52 @@ export default function AppRoutes() {
         element={
           <ProtectedRoute allowedRoles={['SUPER_ADMIN']}>
             <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ── Multi-Stakeholder Collaboration Routes (Stage 11) ─────────── */}
+      <Route
+        path="/collaborations"
+        element={
+          <ProtectedRoute>
+            <CollaborationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/collaborations/:id"
+        element={
+          <ProtectedRoute>
+            <CollaborationDetailPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ── Solution Proposals & Implementation Routes (Stage 12) ─────── */}
+      <Route
+        path="/proposals"
+        element={
+          <ProtectedRoute>
+            <ProposalsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/proposals/submit"
+        element={
+          <ProtectedRoute>
+            <SubmitProposalPage />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ── City Analytics & Impact Dashboard (Stage 13) ──────────────── */}
+      <Route
+        path="/analytics"
+        element={
+          <ProtectedRoute>
+            <AnalyticsDashboard />
           </ProtectedRoute>
         }
       />

@@ -99,10 +99,28 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center gap-3">
             <Link
               to="/map"
-              className="px-3 py-1.5 text-xs font-semibold text-civic-secondary hover:text-navy hover:bg-civic-bg rounded-lg transition-colors inline-flex items-center gap-1.5"
+              className="px-2.5 py-1.5 text-xs font-semibold text-civic-secondary hover:text-navy hover:bg-civic-bg rounded-lg transition-colors inline-flex items-center gap-1.5"
             >
               <MapPin size={13} className="text-green-600" />
-              <span>City Map</span>
+              <span>Map</span>
+            </Link>
+            <Link
+              to="/collaborations"
+              className="px-2.5 py-1.5 text-xs font-semibold text-civic-secondary hover:text-navy hover:bg-civic-bg rounded-lg transition-colors"
+            >
+              Collaborations
+            </Link>
+            <Link
+              to="/proposals"
+              className="px-2.5 py-1.5 text-xs font-semibold text-civic-secondary hover:text-navy hover:bg-civic-bg rounded-lg transition-colors"
+            >
+              Proposals
+            </Link>
+            <Link
+              to="/analytics"
+              className="px-2.5 py-1.5 text-xs font-semibold text-civic-secondary hover:text-navy hover:bg-civic-bg rounded-lg transition-colors"
+            >
+              Analytics
             </Link>
             <Link
               to="/track"

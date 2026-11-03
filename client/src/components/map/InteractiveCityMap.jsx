@@ -258,3 +258,4 @@ InteractiveCityMap.propTypes = {
   onSelectReport: PropTypes.func,
   className: PropTypes.string,
 };
+

@@ -14,3 +14,4 @@ const { reverseGeocodeSchema } = require('../validators/mapValidators');
 router.get('/reverse-geocode', validate(reverseGeocodeSchema, 'query'), reverseGeocodeLocation);
 
 module.exports = router;
+

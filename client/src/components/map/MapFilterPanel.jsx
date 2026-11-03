@@ -183,3 +183,4 @@ MapFilterPanel.propTypes = {
   city: PropTypes.string,
   onCityChange: PropTypes.func.isRequired,
 };
+

@@ -33,16 +33,40 @@ enum ProblemSeverity {
 enum ProblemPriority {
   LOW
   MEDIUM
+  NORMAL
   HIGH
   URGENT
 }
 
 enum ProblemStatus {
   SUBMITTED
+  UNDER_REVIEW
   ACKNOWLEDGED
+  VERIFIED
+  ASSIGNED
   IN_PROGRESS
   RESOLVED
   REJECTED
+}
+
+enum GovernmentRole {
+  GOVERNMENT_ADMIN
+  DEPARTMENT_HEAD
+  GOVERNMENT_OFFICER
+  FIELD_INSPECTOR
+}
+
+enum VerificationAction {
+  VERIFY
+  REJECT
+  REQUEST_INFO
+}
+
+enum OfficerAssignmentStatus {
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
 enum ProposalStatus {
@@ -76,18 +100,19 @@ enum VerificationStatus {
 
 /// Multi-City / Municipal Corporation Entity (e.g. Pune, Bengaluru, Mumbai)
 model City {
-  id              String         @id @default(uuid())
-  name            String         @unique
+  id              String   @id @default(uuid())
+  name            String   @unique
   state           String
-  corporationCode String         @unique
-  isActive        Boolean        @default(true)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  corporationCode String   @unique
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relationships
-  wards           Ward[]         @relation("CityWards")
-  departments     Department[]   @relation("CityDepartments")
-  problems        Problem[]      @relation("CityProblems")
+  wards       Ward[]                     @relation("CityWards")
+  departments Department[]               @relation("CityDepartments")
+  problems    Problem[]                  @relation("CityProblems")
+  officers    GovernmentOfficerProfile[] @relation("CityOfficers")
 
   @@index([name])
   @@index([corporationCode])
@@ -96,17 +121,17 @@ model City {
 
 /// Ward / Territorial division within a city
 model Ward {
-  id              String         @id @default(uuid())
+  id              String   @id @default(uuid())
   cityId          String
   wardNumber      Int
   name            String
   boundaryGeoJson Json?
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   // Relationships
-  city            City           @relation("CityWards", fields: [cityId], references: [id], onDelete: Cascade)
-  problems        Problem[]      @relation("WardProblems")
+  city     City      @relation("CityWards", fields: [cityId], references: [id], onDelete: Cascade)
+  problems Problem[] @relation("WardProblems")
 
   @@unique([cityId, wardNumber])
   @@index([cityId])
@@ -116,19 +141,19 @@ model Ward {
 
 /// Universities, NGOs, Contractors, and Industry partners
 model Organization {
-  id                 String                @id @default(uuid())
+  id                 String   @id @default(uuid())
   name               String
-  orgType            String                // ACADEMIC, INDUSTRY, EXPERT_CONSORTIUM, NGO
-  registrationNumber String?               // CIN, UGC, Registration ID
+  orgType            String // ACADEMIC, INDUSTRY, EXPERT_CONSORTIUM, NGO
+  registrationNumber String? // CIN, UGC, Registration ID
   contactEmail       String?
   contactPhone       String?
-  isVerified         Boolean               @default(false)
-  createdAt          DateTime              @default(now())
-  updatedAt          DateTime              @updatedAt
+  isVerified         Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
   // Relationships
-  solutionProposals  SolutionProposal[]    @relation("OrganizationProposals")
-  collaborations     CollaborationMember[] @relation("OrgCollaborationMembers")
+  solutionProposals SolutionProposal[]    @relation("OrganizationProposals")
+  collaborations    CollaborationMember[] @relation("OrgCollaborationMembers")
 
   @@index([name])
   @@index([orgType])
@@ -137,23 +162,25 @@ model Organization {
 
 /// Municipal and administrative government departments
 model Department {
-  id             String    @id @default(uuid())
+  id             String   @id @default(uuid())
   cityId         String?
   name           String
   description    String?
-  departmentCode String    @unique
+  departmentCode String   @unique
   city           String
   state          String
   contactEmail   String
   contactPhone   String
-  isActive       Boolean   @default(true)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   // Relationships
-  cityEntity          City?                @relation("CityDepartments", fields: [cityId], references: [id], onDelete: SetNull)
-  assignedProblems    Problem[]            @relation("DepartmentProblems")
-  implementationTasks ImplementationTask[] @relation("DepartmentTasks")
+  cityEntity          City?                      @relation("CityDepartments", fields: [cityId], references: [id], onDelete: SetNull)
+  assignedProblems    Problem[]                  @relation("DepartmentProblems")
+  implementationTasks ImplementationTask[]       @relation("DepartmentTasks")
+  officers            GovernmentOfficerProfile[] @relation("DepartmentOfficers")
+  assignedRecords     DepartmentAssignment[]     @relation("DepartmentAssignedRecords")
 
   @@index([city])
   @@index([departmentCode])
@@ -162,27 +189,40 @@ model Department {
 
 /// User accounts across all 6 civic stakeholder roles
 model User {
-  id           String    @id @default(uuid())
+  id           String   @id @default(uuid())
   name         String
-  email        String    @unique
+  email        String   @unique
   phone        String
   passwordHash String
-  role         UserRole  @default(CITIZEN)
-  isActive     Boolean   @default(true)
-  isVerified   Boolean   @default(false)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  role         UserRole @default(CITIZEN)
+  isActive     Boolean  @default(true)
+  isVerified   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // Relationships
-  reportedProblems       Problem[]              @relation("ReportedByUser")
-  solutionProposals      SolutionProposal[]     @relation("SubmittedProposals")
-  assignedTasks          ImplementationTask[]   @relation("AssignedToUser")
-  notifications          Notification[]         @relation("UserNotifications")
-  activityLogs           ActivityLog[]          @relation("UserActivityLogs")
-  feedbacks              Feedback[]             @relation("UserFeedbacks")
-  collaborationMembers   CollaborationMember[]  @relation("UserCollaborationMembers")
-  taskEvidences          TaskEvidence[]         @relation("VerifiedTaskEvidences")
+  reportedProblems        Problem[]                @relation("ReportedByUser")
+  solutionProposals       SolutionProposal[]       @relation("SubmittedProposals")
+  assignedTasks           ImplementationTask[]     @relation("AssignedToUser")
+  notifications           Notification[]           @relation("UserNotifications")
+  activityLogs            ActivityLog[]            @relation("UserActivityLogs")
+  feedbacks               Feedback[]               @relation("UserFeedbacks")
+  collaborationMembers    CollaborationMember[]    @relation("UserCollaborationMembers")
+  taskEvidences           TaskEvidence[]           @relation("VerifiedTaskEvidences")
   resolutionVerifications ResolutionVerification[] @relation("UserResolutionVerifications")
+
+  // Government & Verification relations
+  officerProfile             GovernmentOfficerProfile? @relation("UserOfficerProfile")
+  verificationRecords        VerificationRecord[]      @relation("OfficerVerifications")
+  verifiedProblems           Problem[]                 @relation("ProblemVerifiedByUser")
+  rejectedProblems           Problem[]                 @relation("ProblemRejectedByUser")
+  assignedProblemsAsOfficer  Problem[]                 @relation("ProblemAssignedOfficer")
+  resolvedProblems           Problem[]                 @relation("ProblemResolvedByUser")
+  departmentAssignmentsGiven DepartmentAssignment[]    @relation("UserDepartmentAssignments")
+  officerAssignmentsReceived OfficerAssignment[]       @relation("OfficerAssignedTasks")
+  officerAssignmentsGiven    OfficerAssignment[]       @relation("UserOfficerAssignments")
+  internalNotes              InternalNote[]            @relation("UserInternalNotes")
+  govAuditLogs               GovAuditLog[]             @relation("UserGovAuditLogs")
 
   @@index([email])
   @@index([role])
@@ -191,12 +231,12 @@ model User {
 
 /// Civic problem categories (Roads, Waste, Water, Electricity, etc.)
 model ProblemCategory {
-  id          String    @id @default(uuid())
-  name        String    @unique
+  id          String   @id @default(uuid())
+  name        String   @unique
   description String?
   icon        String?
-  isActive    Boolean   @default(true)
-  createdAt   DateTime  @default(now())
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
 
   // Relationships
   problems Problem[] @relation("CategoryProblems")
@@ -207,13 +247,13 @@ model ProblemCategory {
 
 /// Core Civic Problems reported by citizens (registered or anonymous)
 model Problem {
-  id                   String          @id @default(uuid())
-  trackingNumber       String?         @unique // e.g. JS-2026-A8K7P2
+  id                   String  @id @default(uuid())
+  trackingNumber       String? @unique // e.g. JS-2026-A8K7P2
   title                String
   description          String
   categoryId           String
-  reportedBy           String?         // Nullable for anonymous reports
-  isAnonymous          Boolean         @default(false)
+  reportedBy           String? // Nullable for anonymous reports
+  isAnonymous          Boolean @default(false)
   cityId               String?
   wardId               String?
   assignedDepartmentId String?
@@ -225,31 +265,51 @@ model Problem {
   latitude             Float?
   longitude            Float?
 
-  severity             ProblemSeverity @default(MEDIUM)
-  priority             ProblemPriority @default(MEDIUM)
-  status               ProblemStatus   @default(SUBMITTED)
-  isVerified           Boolean         @default(false)
-  createdAt            DateTime        @default(now())
-  updatedAt            DateTime        @updatedAt
+  severity             ProblemSeverity  @default(MEDIUM)
+  priority             ProblemPriority  @default(MEDIUM)
+  status               ProblemStatus    @default(SUBMITTED)
+  isVerified           Boolean          @default(false)
+  governmentPriority   ProblemPriority? @default(NORMAL)
+  targetCompletionDate DateTime?
+  verifiedAt           DateTime?
+  verifiedByUserId     String?
+  rejectedAt           DateTime?
+  rejectedByUserId     String?
+  rejectionReason      String?
+  assignedOfficerId    String?
+  resolvedAt           DateTime?
+  resolvedByUserId     String?
+  resolutionNotes      String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 
   // Foreign Key Relations
-  category             ProblemCategory        @relation("CategoryProblems", fields: [categoryId], references: [id], onDelete: Restrict)
-  reporter             User?                  @relation("ReportedByUser", fields: [reportedBy], references: [id], onDelete: SetNull)
-  cityEntity           City?                  @relation("CityProblems", fields: [cityId], references: [id], onDelete: SetNull)
-  ward                 Ward?                  @relation("WardProblems", fields: [wardId], references: [id], onDelete: SetNull)
-  assignedDepartment   Department?            @relation("DepartmentProblems", fields: [assignedDepartmentId], references: [id], onDelete: SetNull)
+  category           ProblemCategory @relation("CategoryProblems", fields: [categoryId], references: [id], onDelete: Restrict)
+  reporter           User?           @relation("ReportedByUser", fields: [reportedBy], references: [id], onDelete: SetNull)
+  cityEntity         City?           @relation("CityProblems", fields: [cityId], references: [id], onDelete: SetNull)
+  ward               Ward?           @relation("WardProblems", fields: [wardId], references: [id], onDelete: SetNull)
+  assignedDepartment Department?     @relation("DepartmentProblems", fields: [assignedDepartmentId], references: [id], onDelete: SetNull)
+  verifiedByUser     User?           @relation("ProblemVerifiedByUser", fields: [verifiedByUserId], references: [id], onDelete: SetNull)
+  rejectedByUser     User?           @relation("ProblemRejectedByUser", fields: [rejectedByUserId], references: [id], onDelete: SetNull)
+  assignedOfficer    User?           @relation("ProblemAssignedOfficer", fields: [assignedOfficerId], references: [id], onDelete: SetNull)
+  resolvedByUser     User?           @relation("ProblemResolvedByUser", fields: [resolvedByUserId], references: [id], onDelete: SetNull)
 
   // Reverse Relations
-  anonymousReport      AnonymousReport?       @relation("ProblemAnonymousReport")
-  images               ProblemImage[]         @relation("ProblemImages")
-  statusHistory        ProblemStatusHistory[] @relation("ProblemStatusHistory")
-  aiAnalyses           AIAnalysis[]           @relation("ProblemAIAnalyses")
-  solutionProposals    SolutionProposal[]     @relation("ProblemProposals")
-  collaborations       Collaboration[]        @relation("ProblemCollaborations")
-  implementationTasks  ImplementationTask[]   @relation("ProblemTasks")
-  notifications        Notification[]         @relation("ProblemNotifications")
-  feedbacks            Feedback[]             @relation("ProblemFeedbacks")
-  verifications        ResolutionVerification[] @relation("ProblemVerifications")
+  anonymousReport       AnonymousReport?         @relation("ProblemAnonymousReport")
+  images                ProblemImage[]           @relation("ProblemImages")
+  statusHistory         ProblemStatusHistory[]   @relation("ProblemStatusHistory")
+  aiAnalyses            AIAnalysis[]             @relation("ProblemAIAnalyses")
+  solutionProposals     SolutionProposal[]       @relation("ProblemProposals")
+  collaborations        Collaboration[]          @relation("ProblemCollaborations")
+  implementationTasks   ImplementationTask[]     @relation("ProblemTasks")
+  notifications         Notification[]           @relation("ProblemNotifications")
+  feedbacks             Feedback[]               @relation("ProblemFeedbacks")
+  verifications         ResolutionVerification[] @relation("ProblemVerifications")
+  verificationRecords   VerificationRecord[]     @relation("ProblemVerificationRecords")
+  departmentAssignments DepartmentAssignment[]   @relation("ProblemDepartmentAssignments")
+  officerAssignments    OfficerAssignment[]      @relation("ProblemOfficerAssignments")
+  internalNotes         InternalNote[]           @relation("ProblemInternalNotes")
+  govAuditLogs          GovAuditLog[]            @relation("ProblemGovAuditLogs")
 
   @@index([city])
   @@index([status])
@@ -260,22 +320,24 @@ model Problem {
   @@index([assignedDepartmentId])
   @@index([wardId])
   @@index([isAnonymous])
+  @@index([verifiedByUserId])
+  @@index([assignedOfficerId])
   @@index([createdAt])
   @@map("problems")
 }
 
 /// Cryptographically isolated anonymous report record (Zero PII, no User FK)
 model AnonymousReport {
-  id                String    @id @default(uuid())
-  problemId         String    @unique
-  publicTrackingId  String    @unique // e.g. TRK-2026-XXXXXX
-  trackingTokenHash String    // Salted hash of secret token
+  id                String   @id @default(uuid())
+  problemId         String   @unique
+  publicTrackingId  String   @unique // e.g. TRK-2026-XXXXXX
+  trackingTokenHash String // Salted hash of secret token
   trackingTokenSalt String
-  ipSubnetHash      String?   // Daily-rotated HMAC of subnet for anti-spam
-  createdAt         DateTime  @default(now())
+  ipSubnetHash      String? // Daily-rotated HMAC of subnet for anti-spam
+  createdAt         DateTime @default(now())
 
   // Relation
-  problem           Problem   @relation("ProblemAnonymousReport", fields: [problemId], references: [id], onDelete: Cascade)
+  problem Problem @relation("ProblemAnonymousReport", fields: [problemId], references: [id], onDelete: Cascade)
 
   @@index([publicTrackingId])
   @@map("anonymous_reports")
@@ -283,16 +345,16 @@ model AnonymousReport {
 
 /// Evidence and progress photographs attached to a problem
 model ProblemImage {
-  id           String    @id @default(uuid())
+  id           String   @id @default(uuid())
   problemId    String
   imageUrl     String
   thumbnailUrl String?
   caption      String?
-  stage        String    @default("INTAKE") // INTAKE, IN_PROGRESS, RESOLUTION
-  createdAt    DateTime  @default(now())
+  stage        String   @default("INTAKE") // INTAKE, IN_PROGRESS, RESOLUTION
+  createdAt    DateTime @default(now())
 
   // Relation
-  problem      Problem   @relation("ProblemImages", fields: [problemId], references: [id], onDelete: Cascade)
+  problem Problem @relation("ProblemImages", fields: [problemId], references: [id], onDelete: Cascade)
 
   @@index([problemId])
   @@map("problem_images")
@@ -304,12 +366,12 @@ model ProblemStatusHistory {
   problemId  String
   fromStatus ProblemStatus
   toStatus   ProblemStatus
-  changedBy  String?       // User ID if authenticated, or "SYSTEM" / "ANONYMOUS"
+  changedBy  String? // User ID if authenticated, or "SYSTEM" / "ANONYMOUS"
   remarks    String?
   createdAt  DateTime      @default(now())
 
   // Relation
-  problem    Problem       @relation("ProblemStatusHistory", fields: [problemId], references: [id], onDelete: Cascade)
+  problem Problem @relation("ProblemStatusHistory", fields: [problemId], references: [id], onDelete: Cascade)
 
   @@index([problemId])
   @@map("problem_status_histories")
@@ -325,7 +387,7 @@ model AIAnalysis {
   severity              String
   severityConfidence    Float?    @default(0.85)
   severityReason        String?
-  suggestedSolutions    String    // JSON encoded array of solution proposals
+  suggestedSolutions    String // JSON encoded array of solution proposals
   recommendedDepartment String
   departmentConfidence  Float?    @default(0.9)
   urgency               String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
@@ -371,9 +433,9 @@ model SolutionProposal {
   updatedAt         DateTime       @updatedAt
 
   // Foreign Key Relations
-  problem           Problem       @relation("ProblemProposals", fields: [problemId], references: [id], onDelete: Cascade)
-  submitter         User          @relation("SubmittedProposals", fields: [submittedBy], references: [id], onDelete: Cascade)
-  organization      Organization? @relation("OrganizationProposals", fields: [organizationId], references: [id], onDelete: SetNull)
+  problem      Problem       @relation("ProblemProposals", fields: [problemId], references: [id], onDelete: Cascade)
+  submitter    User          @relation("SubmittedProposals", fields: [submittedBy], references: [id], onDelete: Cascade)
+  organization Organization? @relation("OrganizationProposals", fields: [organizationId], references: [id], onDelete: SetNull)
 
   @@index([problemId])
   @@index([submittedBy])
@@ -384,18 +446,18 @@ model SolutionProposal {
 
 /// Multi-stakeholder collaborations (Industry CSR, University pilots)
 model Collaboration {
-  id                String                 @id @default(uuid())
+  id                String              @id @default(uuid())
   problemId         String
   organization      String
   collaborationType String
   description       String
-  status            CollaborationStatus    @default(INITIATED)
-  createdAt         DateTime               @default(now())
-  updatedAt         DateTime               @updatedAt
+  status            CollaborationStatus @default(INITIATED)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
 
   // Relationships
-  problem           Problem                @relation("ProblemCollaborations", fields: [problemId], references: [id], onDelete: Cascade)
-  members           CollaborationMember[]  @relation("CollaborationMembersList")
+  problem Problem               @relation("ProblemCollaborations", fields: [problemId], references: [id], onDelete: Cascade)
+  members CollaborationMember[] @relation("CollaborationMembersList")
 
   @@index([problemId])
   @@index([status])
@@ -404,17 +466,17 @@ model Collaboration {
 
 /// Junction table for users and organizations participating in a collaboration
 model CollaborationMember {
-  id              String         @id @default(uuid())
+  id              String   @id @default(uuid())
   collaborationId String
   userId          String?
   organizationId  String?
-  role            String         // RESEARCHER, CONTRACTOR, LEAD, OBSERVER
-  joinedAt        DateTime       @default(now())
+  role            String // RESEARCHER, CONTRACTOR, LEAD, OBSERVER
+  joinedAt        DateTime @default(now())
 
   // Relations
-  collaboration   Collaboration  @relation("CollaborationMembersList", fields: [collaborationId], references: [id], onDelete: Cascade)
-  user            User?          @relation("UserCollaborationMembers", fields: [userId], references: [id], onDelete: SetNull)
-  organization    Organization?  @relation("OrgCollaborationMembers", fields: [organizationId], references: [id], onDelete: SetNull)
+  collaboration Collaboration @relation("CollaborationMembersList", fields: [collaborationId], references: [id], onDelete: Cascade)
+  user          User?         @relation("UserCollaborationMembers", fields: [userId], references: [id], onDelete: SetNull)
+  organization  Organization? @relation("OrgCollaborationMembers", fields: [organizationId], references: [id], onDelete: SetNull)
 
   @@index([collaborationId])
   @@index([userId])
@@ -423,24 +485,24 @@ model CollaborationMember {
 
 /// Ground-level resolution and implementation tasks
 model ImplementationTask {
-  id                   String         @id @default(uuid())
+  id                   String     @id @default(uuid())
   problemId            String
   title                String
   description          String
   assignedTo           String?
   assignedDepartmentId String?
   deadline             DateTime?
-  progress             Int            @default(0)
-  status               TaskStatus     @default(PENDING)
+  progress             Int        @default(0)
+  status               TaskStatus @default(PENDING)
   evidence             String?
-  createdAt            DateTime       @default(now())
-  updatedAt            DateTime       @updatedAt
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
 
   // Foreign Key Relations
-  problem              Problem        @relation("ProblemTasks", fields: [problemId], references: [id], onDelete: Cascade)
-  assignee             User?          @relation("AssignedToUser", fields: [assignedTo], references: [id], onDelete: SetNull)
-  assignedDepartment   Department?    @relation("DepartmentTasks", fields: [assignedDepartmentId], references: [id], onDelete: SetNull)
-  evidences            TaskEvidence[] @relation("TaskEvidences")
+  problem            Problem        @relation("ProblemTasks", fields: [problemId], references: [id], onDelete: Cascade)
+  assignee           User?          @relation("AssignedToUser", fields: [assignedTo], references: [id], onDelete: SetNull)
+  assignedDepartment Department?    @relation("DepartmentTasks", fields: [assignedDepartmentId], references: [id], onDelete: SetNull)
+  evidences          TaskEvidence[] @relation("TaskEvidences")
 
   @@index([problemId])
   @@index([assignedTo])
@@ -451,17 +513,17 @@ model ImplementationTask {
 
 /// Verifiable task completion evidence with before/in-progress/after photos
 model TaskEvidence {
-  id           String             @id @default(uuid())
-  taskId       String
-  imageUrl     String
-  caption      String?
-  stage        String             @default("COMPLETED") // BEFORE, IN_PROGRESS, COMPLETED
-  verifiedBy   String?
-  createdAt    DateTime           @default(now())
+  id         String   @id @default(uuid())
+  taskId     String
+  imageUrl   String
+  caption    String?
+  stage      String   @default("COMPLETED") // BEFORE, IN_PROGRESS, COMPLETED
+  verifiedBy String?
+  createdAt  DateTime @default(now())
 
   // Relations
-  task         ImplementationTask @relation("TaskEvidences", fields: [taskId], references: [id], onDelete: Cascade)
-  verifier     User?              @relation("VerifiedTaskEvidences", fields: [verifiedBy], references: [id], onDelete: SetNull)
+  task     ImplementationTask @relation("TaskEvidences", fields: [taskId], references: [id], onDelete: Cascade)
+  verifier User?              @relation("VerifiedTaskEvidences", fields: [verifiedBy], references: [id], onDelete: SetNull)
 
   @@index([taskId])
   @@map("task_evidences")
@@ -527,7 +589,7 @@ model Feedback {
 model ResolutionVerification {
   id               String             @id @default(uuid())
   problemId        String
-  verifiedBy       String?            // User ID or null for anonymous tracking token verification
+  verifiedBy       String? // User ID or null for anonymous tracking token verification
   status           VerificationStatus @default(CONFIRMED_RESOLVED)
   rating           Int?
   feedbackComments String?
@@ -535,9 +597,135 @@ model ResolutionVerification {
   createdAt        DateTime           @default(now())
 
   // Relations
-  problem          Problem            @relation("ProblemVerifications", fields: [problemId], references: [id], onDelete: Cascade)
-  verifier         User?              @relation("UserResolutionVerifications", fields: [verifiedBy], references: [id], onDelete: SetNull)
+  problem  Problem @relation("ProblemVerifications", fields: [problemId], references: [id], onDelete: Cascade)
+  verifier User?   @relation("UserResolutionVerifications", fields: [verifiedBy], references: [id], onDelete: SetNull)
 
   @@index([problemId])
   @@map("resolution_verifications")
+}
+
+/// Government Officer Profile with role hierarchy & department affiliation (Stage 9)
+model GovernmentOfficerProfile {
+  id             String         @id @default(uuid())
+  userId         String         @unique
+  governmentRole GovernmentRole @default(GOVERNMENT_OFFICER)
+  departmentId   String?
+  badgeNumber    String?
+  designation    String?
+  cityId         String
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relationships
+  user       User        @relation("UserOfficerProfile", fields: [userId], references: [id], onDelete: Cascade)
+  department Department? @relation("DepartmentOfficers", fields: [departmentId], references: [id], onDelete: SetNull)
+  city       City        @relation("CityOfficers", fields: [cityId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([cityId])
+  @@index([departmentId])
+  @@map("government_officer_profiles")
+}
+
+/// Official verification or rejection record for civic complaints (Stage 10)
+model VerificationRecord {
+  id              String             @id @default(uuid())
+  problemId       String
+  officerId       String
+  action          VerificationAction
+  notes           String
+  rejectionReason String?
+  createdAt       DateTime           @default(now())
+
+  // Relationships
+  problem Problem @relation("ProblemVerificationRecords", fields: [problemId], references: [id], onDelete: Cascade)
+  officer User    @relation("OfficerVerifications", fields: [officerId], references: [id], onDelete: Cascade)
+
+  @@index([problemId])
+  @@index([officerId])
+  @@map("verification_records")
+}
+
+/// Department assignment record with priority and target deadline (Stage 10)
+model DepartmentAssignment {
+  id                   String          @id @default(uuid())
+  problemId            String
+  departmentId         String
+  assignedByUserId     String
+  assignmentNotes      String?
+  priority             ProblemPriority @default(NORMAL)
+  targetCompletionDate DateTime?
+  reassignmentReason   String?
+  createdAt            DateTime        @default(now())
+
+  // Relationships
+  problem        Problem    @relation("ProblemDepartmentAssignments", fields: [problemId], references: [id], onDelete: Cascade)
+  department     Department @relation("DepartmentAssignedRecords", fields: [departmentId], references: [id], onDelete: Cascade)
+  assignedByUser User       @relation("UserDepartmentAssignments", fields: [assignedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([problemId])
+  @@index([departmentId])
+  @@index([assignedByUserId])
+  @@map("department_assignments")
+}
+
+/// Field officer direct assignment with deadlines and tracking (Stage 10)
+model OfficerAssignment {
+  id               String                  @id @default(uuid())
+  problemId        String
+  officerUserId    String
+  assignedByUserId String
+  assignmentNotes  String?
+  deadline         DateTime?
+  status           OfficerAssignmentStatus @default(ASSIGNED)
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  // Relationships
+  problem        Problem @relation("ProblemOfficerAssignments", fields: [problemId], references: [id], onDelete: Cascade)
+  officerUser    User    @relation("OfficerAssignedTasks", fields: [officerUserId], references: [id], onDelete: Cascade)
+  assignedByUser User    @relation("UserOfficerAssignments", fields: [assignedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([problemId])
+  @@index([officerUserId])
+  @@index([assignedByUserId])
+  @@map("officer_assignments")
+}
+
+/// Internal notes between municipal officers and administrators
+model InternalNote {
+  id        String   @id @default(uuid())
+  problemId String
+  authorId  String
+  noteText  String
+  isPublic  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relationships
+  problem Problem @relation("ProblemInternalNotes", fields: [problemId], references: [id], onDelete: Cascade)
+  author  User    @relation("UserInternalNotes", fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([problemId])
+  @@index([authorId])
+  @@map("internal_notes")
+}
+
+/// Immutable government action audit trail
+model GovAuditLog {
+  id        String   @id @default(uuid())
+  actorId   String
+  action    String
+  problemId String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  // Relationships
+  actor   User     @relation("UserGovAuditLogs", fields: [actorId], references: [id], onDelete: Cascade)
+  problem Problem? @relation("ProblemGovAuditLogs", fields: [problemId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([problemId])
+  @@index([action])
+  @@map("gov_audit_logs")
 }
