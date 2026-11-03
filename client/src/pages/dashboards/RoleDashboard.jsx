@@ -255,3 +255,4 @@ export function IndustryDashboard() {
 export function AdminDashboard() {
   return <RoleDashboard roleKey="SUPER_ADMIN" />;
 }
+

@@ -57,3 +57,4 @@ router.get('/test/admin', authenticate, authorize('SUPER_ADMIN'), (req, res) => 
 });
 
 module.exports = router;
+

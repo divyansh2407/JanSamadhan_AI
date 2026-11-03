@@ -98,3 +98,4 @@ if (require.main === module) {
 }
 
 module.exports = { SEED_USERS, seed };
+

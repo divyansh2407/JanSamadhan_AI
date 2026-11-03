@@ -15,3 +15,4 @@ export const ROLE_DASHBOARDS = {
 export const getDashboardForRole = (role) => {
   return ROLE_DASHBOARDS[role] || '/citizen/dashboard';
 };
+

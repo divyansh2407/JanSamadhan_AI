@@ -54,3 +54,4 @@ const rateLimit = ({ windowMs = 15 * 60 * 1000, max = 30, message = 'Too many re
 module.exports = {
   rateLimit,
 };
+
