@@ -6,7 +6,7 @@
 
 class GrokAIService {
   constructor() {
-    this.apiKey = process.env.XAI_API_KEY || null;
+    this.apiKey = process.env.XAI_API_KEY || process.env.GROK_API_KEY || null;
     this.baseUrl = process.env.XAI_BASE_URL || 'https://api.x.ai/v1';
     this.modelName = process.env.XAI_MODEL_NAME || 'grok-beta';
   }

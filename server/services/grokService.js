@@ -11,7 +11,7 @@ const { URL } = require('url');
 
 const XAI_BASE_URL = process.env.XAI_BASE_URL || 'https://api.x.ai/v1';
 const XAI_MODEL = process.env.XAI_MODEL || 'grok-2-latest';
-const XAI_API_KEY = process.env.XAI_API_KEY ? process.env.XAI_API_KEY.trim() : '';
+const XAI_API_KEY = (process.env.XAI_API_KEY || process.env.GROK_API_KEY || '').trim();
 
 const REQUEST_TIMEOUT_MS = 20000; // 20s timeout
 const MAX_RETRIES = 3;
