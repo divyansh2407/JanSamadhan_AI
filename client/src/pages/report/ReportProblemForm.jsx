@@ -419,13 +419,23 @@ export default function ReportProblemForm() {
       const uploadedFileUrls = [];
       if (selectedFiles.length > 0) {
         setUploadingImages(true);
-        for (const file of selectedFiles) {
-          const res = await reportService.uploadImage(file);
-          if (res && res.url) {
-            uploadedFileUrls.push(res.url);
+        try {
+          for (const file of selectedFiles) {
+            const res = await reportService.uploadImage(file);
+            if (res && res.url) {
+              uploadedFileUrls.push(res.url);
+            }
           }
+        } catch (uploadErr) {
+          console.error('Image upload failed:', uploadErr);
+          throw new Error(
+            uploadErr.response?.data?.message ||
+              uploadErr.message ||
+              'Failed to upload image evidence. Please check file format and size.'
+          );
+        } finally {
+          setUploadingImages(false);
         }
-        setUploadingImages(false);
       }
 
       // 2. Prepare payload

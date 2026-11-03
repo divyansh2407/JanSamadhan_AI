@@ -24,7 +24,19 @@ const upload = multer({
 
 const handleImageUpload = async (req, res, next) => {
   try {
-    if (!req.file && (!req.files || req.files.length === 0)) {
+    let files = [];
+    if (req.file) {
+      files.push(req.file);
+    } else if (Array.isArray(req.files)) {
+      files = req.files;
+    } else if (req.files && typeof req.files === 'object') {
+      Object.values(req.files).forEach((item) => {
+        if (Array.isArray(item)) files.push(...item);
+        else if (item) files.push(item);
+      });
+    }
+
+    if (files.length === 0) {
       return res.status(400).json({
         success: false,
         statusCode: 400,
@@ -32,24 +44,22 @@ const handleImageUpload = async (req, res, next) => {
       });
     }
 
-    // Single file upload
-    if (req.file) {
-      const url = await saveImage(req.file);
-      return res.status(201).json({
-        success: true,
-        statusCode: 201,
-        message: 'Image uploaded and EXIF metadata sanitized successfully.',
-        data: { url },
-      });
-    }
+    // Process and save images (stripping EXIF metadata)
+    const urls = await Promise.all(files.map((f) => saveImage(f)));
 
-    // Multiple files upload
-    const urls = await Promise.all(req.files.map((f) => saveImage(f)));
     return res.status(201).json({
       success: true,
       statusCode: 201,
-      message: 'Images uploaded and EXIF metadata sanitized successfully.',
-      data: { urls },
+      message:
+        files.length > 1
+          ? 'Images uploaded and EXIF metadata sanitized successfully.'
+          : 'Image uploaded and EXIF metadata sanitized successfully.',
+      data: {
+        url: urls[0],
+        urls,
+      },
+      url: urls[0],
+      urls,
     });
   } catch (error) {
     if (error.code === 'LIMIT_FILE_SIZE') {

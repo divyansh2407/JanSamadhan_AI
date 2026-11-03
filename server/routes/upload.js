@@ -9,12 +9,12 @@ const router = express.Router();
 const { upload, handleImageUpload } = require('../controllers/uploadController');
 const { publicReportRateLimiter } = require('../middleware/rateLimiter');
 
-// POST /api/upload (Supports single 'image' or array 'images')
+// POST /api/upload (Supports 'image', 'images', 'file', 'photos', etc.)
 router.post(
   '/',
   publicReportRateLimiter,
   (req, res, next) => {
-    upload.array('images', 3)(req, res, (err) => {
+    upload.any()(req, res, (err) => {
       if (err) {
         return res.status(400).json({
           success: false,

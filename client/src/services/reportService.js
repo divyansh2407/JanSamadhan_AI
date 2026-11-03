@@ -27,6 +27,7 @@ export const reportService = {
    */
   async uploadImage(file) {
     const formData = new FormData();
+    formData.append('images', file);
     formData.append('image', file);
 
     const response = await api.post('/upload', formData, {
@@ -36,7 +37,12 @@ export const reportService = {
       timeout: 30000,
     });
 
-    return response.data?.data || null;
+    const resData = response.data?.data || response.data;
+    const url = resData?.url || (Array.isArray(resData?.urls) ? resData.urls[0] : null);
+    return {
+      url,
+      urls: resData?.urls || (url ? [url] : []),
+    };
   },
 
   /**
