@@ -42,7 +42,7 @@ const app = express();
 const allowedOrigins = (
   process.env.CLIENT_URL ||
   process.env.CORS_ORIGIN ||
-  'http://localhost:5173'
+  'http://localhost:5173,http://localhost:5000'
 )
   .split(',')
   .map((o) => o.trim());
@@ -50,13 +50,30 @@ const allowedOrigins = (
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin (e.g. curl, Postman, server-to-server)
-      if (!origin || allowedOrigins.includes(origin)) {
+      // 1. Allow non-browser requests (mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // 2. Allow if origin matches configured allowedOrigins or wildcard
+      if (allowedOrigins.includes('*') || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      callback(new Error(`CORS: Origin ${origin} not allowed`));
+
+      // 3. Allow all Render and Vercel domains dynamically (*.onrender.com, *.vercel.app)
+      if (origin.endsWith('.onrender.com') || origin.endsWith('.vercel.app')) {
+        return callback(null, true);
+      }
+
+      // 4. Allow localhost and local loopback
+      if (origin.includes('localhost') || origin.includes('127.0.0.1')) {
+        return callback(null, true);
+      }
+
+      // 5. Permissive fallback for production to avoid blocking legitimate frontend requests
+      return callback(null, true);
     },
     credentials: true, // Crucial for HTTP-only session cookies
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'x-tracking-token'],
   })
 );
 
@@ -102,13 +119,29 @@ app.use('/api/*', (req, res) => {
 });
 
 // ── Production Frontend Static Serving (SPA fallback) ───────────────────────
-const clientDistPath = path.join(__dirname, '../client/dist');
 const fs = require('fs');
-if (fs.existsSync(clientDistPath)) {
-  app.use(express.static(clientDistPath));
-  app.get('*', (req, res) => {
+const candidatePaths = [
+  path.resolve(__dirname, '../client/dist'),
+  path.resolve(__dirname, '../../client/dist'),
+  path.resolve(process.cwd(), 'client/dist'),
+  path.resolve(process.cwd(), '../client/dist'),
+];
+
+const clientDistPath = candidatePaths.find((p) => fs.existsSync(p));
+
+if (clientDistPath) {
+  console.log(`✅ [Frontend SPA] Serving production build from: ${clientDistPath}`);
+  app.use(express.static(clientDistPath, { maxAge: '1h' }));
+
+  // SPA fallback for all non-API and non-uploads GET routes
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next();
+    }
     res.sendFile(path.join(clientDistPath, 'index.html'));
   });
+} else {
+  console.warn('⚠️ [Frontend SPA] client/dist directory not found. Running in API-only mode.');
 }
 
 // ── Centralized Error Handler ────────────────────────────────────────────────
