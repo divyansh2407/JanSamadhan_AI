@@ -22,3 +22,4 @@ router.patch('/me', updateMyProfile);
 router.get('/:id', getUserById);
 
 module.exports = router;
+

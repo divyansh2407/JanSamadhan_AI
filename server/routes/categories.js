@@ -20,3 +20,4 @@ router.get('/', getCategories);
 router.post('/', authenticate, authorize('SUPER_ADMIN'), createCategory);
 
 module.exports = router;
+

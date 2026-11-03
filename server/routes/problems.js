@@ -26,3 +26,4 @@ router.patch('/:id', authenticate, updateProblem);
 router.delete('/:id', authenticate, deleteProblem);
 
 module.exports = router;
+
