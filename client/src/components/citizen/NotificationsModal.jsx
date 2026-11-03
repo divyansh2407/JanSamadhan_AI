@@ -122,3 +122,4 @@ NotificationsModal.propTypes = {
   onMarkRead: PropTypes.func,
   onViewReport: PropTypes.func,
 };
+

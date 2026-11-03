@@ -54,3 +54,4 @@ StatsCard.propTypes = {
   description: PropTypes.string,
   isLoading: PropTypes.bool,
 };
+

@@ -44,3 +44,4 @@ router.patch('/notifications/:id/read', markNotificationRead);
 router.get('/profile', getCitizenProfile);
 
 module.exports = router;
+

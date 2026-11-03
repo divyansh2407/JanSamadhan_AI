@@ -73,3 +73,4 @@ const citizenService = {
 };
 
 export default citizenService;
+

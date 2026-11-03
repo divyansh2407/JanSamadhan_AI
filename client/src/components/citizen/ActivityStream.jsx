@@ -102,3 +102,4 @@ ActivityStream.propTypes = {
   onViewProblem: PropTypes.func,
   isLoading: PropTypes.bool,
 };
+

@@ -162,3 +162,4 @@ All 58 regression tests in `server/test-stage4-suite.js` also continue to pass 1
 ## 8. Known Limitations & Transition to Stage 6
 
 * **Stage 6 Intake Pipeline:** The "Report a Civic Issue" button currently presents the Stage 6 roadmap notice modal. The full interactive Leaflet map pin placement, client-side EXIF stripping, and multi-photo upload pipeline will be implemented in **Stage 6: Registered and Anonymous Reporting Pipeline**.
+

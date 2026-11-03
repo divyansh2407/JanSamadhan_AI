@@ -318,3 +318,4 @@ ReportsTable.propTypes = {
   onViewDetails: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
 };
+

@@ -239,3 +239,4 @@ ProfileView.propTypes = {
   profile: PropTypes.object,
   onProfileUpdated: PropTypes.func,
 };
+

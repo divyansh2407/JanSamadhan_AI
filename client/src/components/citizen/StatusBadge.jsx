@@ -93,3 +93,4 @@ StatusBadge.propTypes = {
   status: PropTypes.string,
   className: PropTypes.string,
 };
+
