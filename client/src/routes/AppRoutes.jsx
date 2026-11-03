@@ -13,6 +13,7 @@ import ReportEntryPage from '../pages/report/ReportEntryPage';
 import ReportProblemForm from '../pages/report/ReportProblemForm';
 import ReportConfirmation from '../pages/report/ReportConfirmation';
 import TrackReportPage from '../pages/report/TrackReportPage';
+import CityMapExplorerPage from '../pages/map/CityMapExplorerPage';
 import AIAnalysisPreviewPage from '../pages/dashboards/AIAnalysisPreviewPage';
 import {
   GovernmentDashboard,
@@ -29,6 +30,7 @@ export default function AppRoutes() {
       <Route path="/" element={<HomePage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/map" element={<CityMapExplorerPage />} />
 
       {/* ── Civic Reporting & Tracking Routes (Stage 6) ─────────────────── */}
       <Route path="/report" element={<ReportEntryPage />} />

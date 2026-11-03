@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Building2, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Building2, User, LogOut, LayoutDashboard, MapPin } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const NAV_LINKS = [
@@ -98,6 +98,13 @@ export default function Navbar() {
           {/* ── Desktop CTA / User Profile ────────────────────────────── */}
           <div className="hidden lg:flex items-center gap-3">
             <Link
+              to="/map"
+              className="px-3 py-1.5 text-xs font-semibold text-civic-secondary hover:text-navy hover:bg-civic-bg rounded-lg transition-colors inline-flex items-center gap-1.5"
+            >
+              <MapPin size={13} className="text-green-600" />
+              <span>City Map</span>
+            </Link>
+            <Link
               to="/track"
               className="px-3 py-1.5 text-xs font-semibold text-civic-secondary hover:text-navy hover:bg-civic-bg rounded-lg transition-colors"
             >
@@ -179,20 +186,28 @@ export default function Navbar() {
             </a>
           ))}
 
-          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-civic-border">
+          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-civic-border">
+            <Link
+              to="/map"
+              onClick={() => setIsOpen(false)}
+              className="text-center px-2 py-2 text-xs font-semibold text-navy bg-civic-bg hover:bg-green-light rounded-lg transition-colors flex items-center justify-center gap-1"
+            >
+              <MapPin size={12} className="text-green-600" />
+              <span>Map</span>
+            </Link>
             <Link
               to="/report"
               onClick={() => setIsOpen(false)}
-              className="text-center px-3 py-2 text-xs font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors"
+              className="text-center px-2 py-2 text-xs font-semibold text-white bg-green hover:bg-green-600 rounded-lg transition-colors"
             >
-              Report Issue
+              Report
             </Link>
             <Link
               to="/track"
               onClick={() => setIsOpen(false)}
-              className="text-center px-3 py-2 text-xs font-semibold text-navy bg-civic-bg hover:bg-green-light rounded-lg transition-colors"
+              className="text-center px-2 py-2 text-xs font-semibold text-navy bg-civic-bg hover:bg-green-light rounded-lg transition-colors"
             >
-              Track Report
+              Track
             </Link>
           </div>
 

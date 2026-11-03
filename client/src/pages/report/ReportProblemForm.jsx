@@ -28,6 +28,7 @@ import {
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import CategoryIcon from '../../components/common/CategoryIcon';
+import LocationSelector from '../../components/map/LocationSelector';
 import reportService from '../../services/reportService';
 import { useAuth } from '../../hooks/useAuth';
 
@@ -672,59 +673,21 @@ export default function ReportProblemForm() {
                 <div>
                   <h3 className="text-xl font-bold text-[#172B20]">Location Details</h3>
                   <p className="text-xs text-[#647067] mt-1">
-                    Pinpoint where the problem is located so municipal field officers can reach it quickly.
+                    Pinpoint where the problem is located using GPS, OpenStreetMap pin placement, or manual address.
                   </p>
                 </div>
 
-                {/* Option A: Browser Geolocation */}
-                <div className="p-4 rounded-2xl bg-[#F8FAF8] border border-civic-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-green-100 text-green-700 flex items-center justify-center shrink-0">
-                      <Crosshair className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-xs font-bold text-[#172B20]">Option A: Detect Current Location</h4>
-                      <p className="text-[11px] text-[#647067] mt-0.5">
-                        Capture GPS coordinates directly via your device browser.
-                      </p>
-                      {formData.latitude && formData.longitude && (
-                        <div className="mt-1 text-[11px] font-mono text-green-800 flex items-center gap-2">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                          <span>
-                            GPS: {formData.latitude}, {formData.longitude} (±{formData.locationAccuracy || 10}m)
-                          </span>
-                        </div>
-                      )}
-                      {gpsError && (
-                        <p className="mt-1 text-[11px] text-rose-600">{gpsError}</p>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleUseCurrentLocation}
-                    disabled={gpsLoading}
-                    className="px-4 py-2 rounded-xl bg-white border border-green-600 text-green-700 hover:bg-green-50 text-xs font-semibold shadow-2xs transition-colors shrink-0 inline-flex items-center gap-1.5"
-                  >
-                    {gpsLoading ? (
-                      <>
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        <span>Detecting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <MapPin className="w-3.5 h-3.5" />
-                        <span>Use My Location</span>
-                      </>
-                    )}
-                  </button>
-                </div>
+                {/* Location Intelligence: GPS Detection & Interactive OpenStreetMap Pin */}
+                <LocationSelector
+                  value={formData}
+                  onChange={setFormData}
+                  city={formData.city || 'Pune'}
+                />
 
                 {/* Option B: Manual Address Fields */}
                 <div className="space-y-4">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-[#647067]">
-                    Option B: Manual Location & Landmark Details
+                    Address & Landmark Details
                   </h4>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

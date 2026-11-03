@@ -21,6 +21,8 @@ const path = require('path');
 const citizenRoutes = require('./routes/citizen');
 const uploadRoutes = require('./routes/upload');
 const aiRoutes = require('./routes/ai');
+const mapRoutes = require('./routes/map');
+const locationRoutes = require('./routes/location');
 
 
 
@@ -73,6 +75,8 @@ app.use('/api/public/reports', publicReportRoutes);
 app.use('/api/citizen', citizenRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/map', mapRoutes);
+app.use('/api/location', locationRoutes);
 
 
 
