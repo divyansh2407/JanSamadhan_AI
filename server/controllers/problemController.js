@@ -121,9 +121,14 @@ const getProblemById = async (req, res, next) => {
       where: { id },
       include: {
         category: true,
+        images: true,
+        statusHistory: {
+          orderBy: { createdAt: 'asc' },
+        },
         reporter: {
           select: { id: true, name: true, email: true, phone: true, role: true },
         },
+
         assignedDepartment: true,
         aiAnalyses: {
           orderBy: { createdAt: 'desc' },
@@ -187,10 +192,14 @@ const createProblem = async (req, res, next) => {
       city,
       state,
       pincode,
+      wardId,
       latitude,
       longitude,
       severity = 'MEDIUM',
+      priority = 'MEDIUM',
+      imageUrl,
     } = req.body;
+
 
     // Validation
     const errors = [];
@@ -229,30 +238,60 @@ const createProblem = async (req, res, next) => {
     const validatedSeverity = VALID_SEVERITIES.includes(severity?.toUpperCase())
       ? severity.toUpperCase()
       : 'MEDIUM';
+    const validatedPriority = VALID_PRIORITIES.includes(priority?.toUpperCase())
+      ? priority.toUpperCase()
+      : 'MEDIUM';
 
-    const newProblem = await prisma.problem.create({
-      data: {
-        title: title.trim(),
-        description: description.trim(),
-        categoryId,
-        reportedBy: req.user.id,
-        address: address.trim(),
-        city: city.trim(),
-        state: state.trim(),
-        pincode: pincode.trim(),
-        latitude: latitude ? parseFloat(latitude) : null,
-        longitude: longitude ? parseFloat(longitude) : null,
-        severity: validatedSeverity,
-        priority: 'MEDIUM',
-        status: 'SUBMITTED',
-        isVerified: false,
-      },
-      include: {
-        category: true,
-        reporter: {
-          select: { id: true, name: true, role: true },
+    const newProblem = await prisma.$transaction(async (tx) => {
+      const problem = await tx.problem.create({
+        data: {
+          title: title.trim(),
+          description: description.trim(),
+          categoryId,
+          reportedBy: req.user.id,
+          isAnonymous: false,
+          address: address.trim(),
+          city: city.trim(),
+          state: state.trim(),
+          pincode: pincode.trim(),
+          wardId: wardId || null,
+          latitude: latitude ? parseFloat(latitude) : null,
+          longitude: longitude ? parseFloat(longitude) : null,
+          severity: validatedSeverity,
+          priority: validatedPriority,
+          status: 'SUBMITTED',
+          isVerified: false,
         },
-      },
+        include: {
+          category: true,
+          reporter: {
+            select: { id: true, name: true, role: true },
+          },
+        },
+      });
+
+      if (imageUrl) {
+        await tx.problemImage.create({
+          data: {
+            problemId: problem.id,
+            imageUrl,
+            stage: 'INTAKE',
+            caption: 'Citizen uploaded evidence',
+          },
+        });
+      }
+
+      await tx.problemStatusHistory.create({
+        data: {
+          problemId: problem.id,
+          fromStatus: 'SUBMITTED',
+          toStatus: 'SUBMITTED',
+          changedBy: req.user.id,
+          remarks: 'Registered citizen problem submitted.',
+        },
+      });
+
+      return problem;
     });
 
     res.status(201).json({
@@ -260,6 +299,7 @@ const createProblem = async (req, res, next) => {
       message: 'Civic problem reported successfully',
       problem: newProblem,
     });
+
   } catch (error) {
     next(error);
   }

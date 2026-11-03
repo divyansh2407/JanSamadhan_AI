@@ -15,6 +15,8 @@ const {
 
 const { authenticate, authorize } = require('../middleware/auth');
 const { rateLimit } = require('../middleware/rateLimiter');
+const validate = require('../middleware/validate');
+const { registerSchema, loginSchema } = require('../validators/authValidators');
 
 // Rate-limited authentication endpoints
 const authLimiter = rateLimit({
@@ -24,9 +26,10 @@ const authLimiter = rateLimit({
 });
 
 // ── Public Routes ────────────────────────────────────────────────────────────
-router.post('/register', authLimiter, register);
-router.post('/login', authLimiter, login);
+router.post('/register', authLimiter, validate(registerSchema), register);
+router.post('/login', authLimiter, validate(loginSchema), login);
 router.post('/logout', logout);
+
 
 // ── Authenticated Routes ─────────────────────────────────────────────────────
 router.get('/me', authenticate, getMe);

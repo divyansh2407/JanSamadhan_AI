@@ -14,6 +14,11 @@ const {
 } = require('../controllers/departmentController');
 
 const { authenticate, authorize } = require('../middleware/auth');
+const validate = require('../middleware/validate');
+const {
+  createDepartmentSchema,
+  updateDepartmentSchema,
+} = require('../validators/departmentValidators');
 
 // Public read routes
 router.get('/', getDepartments);
@@ -24,6 +29,7 @@ router.post(
   '/',
   authenticate,
   authorize('SUPER_ADMIN', 'GOVERNMENT'),
+  validate(createDepartmentSchema),
   createDepartment
 );
 
@@ -31,8 +37,10 @@ router.patch(
   '/:id',
   authenticate,
   authorize('SUPER_ADMIN', 'GOVERNMENT'),
+  validate(updateDepartmentSchema),
   updateDepartment
 );
+
 
 module.exports = router;
 

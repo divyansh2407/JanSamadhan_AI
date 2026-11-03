@@ -16,6 +16,8 @@ const userRoutes = require('./routes/users');
 const departmentRoutes = require('./routes/departments');
 const categoryRoutes = require('./routes/categories');
 const problemRoutes = require('./routes/problems');
+const publicReportRoutes = require('./routes/publicReports');
+
 
 // Load environment variables
 dotenv.config();
@@ -58,6 +60,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/departments', departmentRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/problems', problemRoutes);
+app.use('/api/public/reports', publicReportRoutes);
+
 
 // 404 handler for unknown API routes
 app.use('/api/*', (req, res) => {

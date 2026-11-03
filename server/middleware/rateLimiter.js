@@ -51,7 +51,15 @@ const rateLimit = ({ windowMs = 15 * 60 * 1000, max = 30, message = 'Too many re
   };
 };
 
+const publicReportRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 anonymous reports per 15 minutes per IP
+  message: 'Too many anonymous reports submitted from this network. Please try again after 15 minutes.',
+});
+
 module.exports = {
   rateLimit,
+  publicReportRateLimiter,
 };
+
 

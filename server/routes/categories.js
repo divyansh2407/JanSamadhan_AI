@@ -12,12 +12,21 @@ const {
 } = require('../controllers/categoryController');
 
 const { authenticate, authorize } = require('../middleware/auth');
+const validate = require('../middleware/validate');
+const { createCategorySchema } = require('../validators/categoryValidators');
 
 // Public read route
 router.get('/', getCategories);
 
 // Protected admin creation route
-router.post('/', authenticate, authorize('SUPER_ADMIN'), createCategory);
+router.post(
+  '/',
+  authenticate,
+  authorize('SUPER_ADMIN'),
+  validate(createCategorySchema),
+  createCategory
+);
+
 
 module.exports = router;
 
