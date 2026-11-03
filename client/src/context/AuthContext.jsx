@@ -50,7 +50,16 @@ export function AuthProvider({ children }) {
       }
       throw new Error(data?.message || 'Login failed');
     } catch (err) {
-      const message = err.response?.data?.message || err.message || 'Login failed. Please verify credentials.';
+      const fieldError =
+        err.response?.data?.errors?.[0]?.message ||
+        (Array.isArray(err.response?.data?.errors)
+          ? err.response?.data?.errors.map((e) => e.message || e).join(', ')
+          : null);
+      const message =
+        fieldError ||
+        err.response?.data?.message ||
+        err.message ||
+        'Login failed. Please verify credentials.';
       setError(message);
       return { success: false, error: message };
     }
@@ -72,7 +81,16 @@ export function AuthProvider({ children }) {
       }
       throw new Error(data?.message || 'Registration failed');
     } catch (err) {
-      const message = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+      const fieldError =
+        err.response?.data?.errors?.[0]?.message ||
+        (Array.isArray(err.response?.data?.errors)
+          ? err.response?.data?.errors.map((e) => e.message || e).join(', ')
+          : null);
+      const message =
+        fieldError ||
+        err.response?.data?.message ||
+        err.message ||
+        'Registration failed. Please try again.';
       setError(message);
       return { success: false, error: message };
     }

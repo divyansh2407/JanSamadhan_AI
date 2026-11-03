@@ -52,8 +52,20 @@ export default function RegisterForm() {
       return 'Please enter a valid mobile number (e.g. +91 98765 43210).';
     }
 
-    if (!formData.password || formData.password.length < 6) {
-      return 'Password must be at least 6 characters long.';
+    if (!formData.password || formData.password.length < 8) {
+      return 'Password must be at least 8 characters long.';
+    }
+
+    if (!/[A-Z]/.test(formData.password)) {
+      return 'Password must contain at least one uppercase letter (e.g. A-Z).';
+    }
+
+    if (!/[a-z]/.test(formData.password)) {
+      return 'Password must contain at least one lowercase letter (e.g. a-z).';
+    }
+
+    if (!/\d/.test(formData.password)) {
+      return 'Password must contain at least one number (0-9).';
     }
 
     if (formData.password !== formData.confirmPassword) {
@@ -209,7 +221,7 @@ export default function RegisterForm() {
             required
             value={formData.password}
             onChange={handleChange}
-            placeholder="At least 6 characters"
+            placeholder="Min 8 characters (e.g. Divyansh@12)"
             className="w-full pl-10 pr-11 py-2 text-sm rounded-xl border border-civic-border bg-white text-civic-text placeholder:text-civic-secondary/50 focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
           />
           <button
@@ -220,6 +232,9 @@ export default function RegisterForm() {
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
+        <p className="mt-1 text-[11px] text-civic-secondary">
+          Password must have at least 8 characters with 1 uppercase letter, 1 lowercase letter, and 1 number.
+        </p>
       </div>
 
       {/* Confirm Password */}
