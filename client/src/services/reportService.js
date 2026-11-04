@@ -28,7 +28,6 @@ export const reportService = {
   async uploadImage(file) {
     const formData = new FormData();
     formData.append('images', file);
-    formData.append('image', file);
 
     const response = await api.post('/upload', formData, {
       headers: {
