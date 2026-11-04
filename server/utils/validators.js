@@ -20,8 +20,23 @@ const validatePasswordStrength = (password) => {
   return password.length >= 6;
 };
 
-const validateRegistrationInput = ({ name, email, phone, password }) => {
+const validateRegistrationInput = ({
+  name,
+  email,
+  phone,
+  password,
+  accountType,
+  role,
+  city,
+  departmentName,
+  organizationName,
+  designation,
+  areaOfExpertise,
+  industryType,
+}) => {
   const errors = [];
+
+  const targetRole = (role || accountType || 'CITIZEN').toUpperCase();
 
   if (!name || typeof name !== 'string' || name.trim().length < 2) {
     errors.push('Full name must be at least 2 characters long');
@@ -37,6 +52,21 @@ const validateRegistrationInput = ({ name, email, phone, password }) => {
 
   if (!password || !validatePasswordStrength(password)) {
     errors.push('Password must be at least 6 characters long');
+  }
+
+  // Account-type specific checks
+  if (targetRole === 'GOVERNMENT') {
+    if (!departmentName && !organizationName) {
+      errors.push('Government department and organization are required');
+    }
+  } else if (targetRole === 'UNIVERSITY') {
+    if (!organizationName) {
+      errors.push('University name is required');
+    }
+  } else if (targetRole === 'INDUSTRY') {
+    if (!organizationName) {
+      errors.push('Company name is required');
+    }
   }
 
   return {

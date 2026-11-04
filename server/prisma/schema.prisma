@@ -197,6 +197,12 @@ model User {
   role         UserRole @default(CITIZEN)
   isActive     Boolean  @default(true)
   isVerified   Boolean  @default(false)
+  city             String?
+  organizationName String?
+  departmentName   String?
+  designation      String?
+  areaOfExpertise  String?
+  industryType     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 

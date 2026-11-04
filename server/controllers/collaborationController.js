@@ -3,6 +3,7 @@
  */
 
 const { prisma } = require('../config/db');
+const offlineStore = require('../config/offlineStore');
 
 function isDbOffline(err) {
   return (
@@ -36,7 +37,8 @@ const listCollaborations = async (req, res) => {
     res.json({ success: true, data: { collaborations, total } });
   } catch (err) {
     if (isDbOffline(err)) {
-      return res.json({ success: true, data: { collaborations: [], total: 0 }, offline: true });
+      const collabs = offlineStore.listCollaborations({ status });
+      return res.json({ success: true, data: { collaborations: collabs, total: collabs.length }, offline: true });
     }
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -83,7 +85,13 @@ const createCollaboration = async (req, res) => {
     res.status(201).json({ success: true, data: collab });
   } catch (err) {
     if (isDbOffline(err)) {
-      return res.status(503).json({ success: false, message: 'Database offline' });
+      const collab = offlineStore.createCollaboration({
+        problemId: req.body?.problemId,
+        organization: req.body?.organization,
+        collaborationType: req.body?.collaborationType,
+        description: req.body?.description,
+      });
+      return res.status(201).json({ success: true, data: collab, offline: true });
     }
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -106,7 +114,7 @@ const joinCollaboration = async (req, res) => {
     res.status(201).json({ success: true, data: member });
   } catch (err) {
     if (isDbOffline(err)) {
-      return res.status(503).json({ success: false, message: 'Database offline' });
+      return res.status(201).json({ success: true, data: { id: `mem-${Date.now()}`, role }, offline: true });
     }
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -126,7 +134,8 @@ const updateCollaborationStatus = async (req, res) => {
     res.json({ success: true, data: updated });
   } catch (err) {
     if (isDbOffline(err)) {
-      return res.status(503).json({ success: false, message: 'Database offline' });
+      const updated = offlineStore.updateCollaborationStatus(req.params.id, req.body?.status);
+      return res.json({ success: true, data: updated, offline: true });
     }
     res.status(500).json({ success: false, message: 'Server error' });
   }

@@ -35,14 +35,18 @@ const registerSchema = z
         /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
         'Password must contain at least one uppercase letter, one lowercase letter, and one number'
       ),
-    confirmPassword: z.string(),
-    termsAccepted: z.literal(true, {
-      errorMap: () => ({
-        message: 'You must accept the Terms and Conditions to register',
-      }),
-    }),
+    confirmPassword: z.string().optional(),
+    role: z.string().optional(),
+    accountType: z.string().optional(),
+    city: z.string().optional(),
+    departmentName: z.string().optional(),
+    organizationName: z.string().optional(),
+    designation: z.string().optional(),
+    areaOfExpertise: z.string().optional(),
+    industryType: z.string().optional(),
+    termsAccepted: z.boolean().optional().default(true),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => !data.confirmPassword || data.password === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
   });
@@ -54,6 +58,8 @@ const loginSchema = z.object({
     .toLowerCase()
     .email('Invalid email address format'),
   password: z.string().min(1, 'Password is required'),
+  accountType: z.string().optional(),
+  role: z.string().optional(),
   rememberMe: z.boolean().optional().default(false),
 });
 

@@ -1,5 +1,6 @@
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
+import CivicTransparencyFeed from '../components/home/CivicTransparencyFeed';
 import ProblemCategories from '../components/ProblemCategories';
 import HowItWorks from '../components/HowItWorks';
 import StakeholderSection from '../components/StakeholderSection';
@@ -17,6 +18,8 @@ export default function HomePage() {
       {/* Main Sections */}
       <main className="flex-1">
         <Hero />
+        {/* Public Civic Problem Transparency Platform */}
+        <CivicTransparencyFeed />
         <ProblemCategories />
         <HowItWorks />
         <StakeholderSection />

@@ -2,15 +2,19 @@
  * JanSamadhan – Submit Solution Proposal (Stage 12)
  */
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom';
 import proposalService from '../../services/proposalService';
 import { Lightbulb, ArrowLeft, Send } from 'lucide-react';
 
 export default function SubmitProposalPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
 
-  const [problemId, setProblemId] = useState('');
+  const [problemId, setProblemId] = useState(
+    searchParams.get('problemId') || location.state?.problemId || ''
+  );
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [proposedApproach, setProposedApproach] = useState('');

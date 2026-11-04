@@ -29,10 +29,49 @@ function isDbOffline(err) {
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, phone, password } = req.body;
+    const {
+      name,
+      email,
+      phone,
+      password,
+      accountType,
+      role,
+      city,
+      departmentName,
+      department,
+      organizationName,
+      organization,
+      universityName,
+      companyName,
+      designation,
+      areaOfExpertise,
+      expertise,
+      industryType,
+    } = req.body;
+
+    const rawRole = (accountType || role || 'CITIZEN').toUpperCase();
+    const publicAllowedRoles = ['CITIZEN', 'GOVERNMENT', 'UNIVERSITY', 'INDUSTRY', 'EXPERT'];
+    const finalRole = publicAllowedRoles.includes(rawRole) ? rawRole : 'CITIZEN';
+
+    const orgName = organizationName || organization || universityName || companyName || null;
+    const deptName = departmentName || department || null;
+    const expField = areaOfExpertise || expertise || null;
 
     // Validate input fields
-    const validation = validateRegistrationInput({ name, email, phone, password });
+    const validation = validateRegistrationInput({
+      name,
+      email,
+      phone,
+      password,
+      role: finalRole,
+      city,
+      departmentName: deptName,
+      organizationName: orgName,
+      designation,
+      areaOfExpertise: expField,
+      industryType,
+    });
+
     if (!validation.isValid) {
       return res.status(400).json({
         success: false,
@@ -68,27 +107,30 @@ const register = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const passwordHash = await bcrypt.hash(password, salt);
 
-    // SECURITY: Never trust role from frontend in public registration
+    const newUserData = {
+      name: name.trim(),
+      email: normalizedEmail,
+      phone: phone ? phone.trim() : null,
+      passwordHash,
+      role: finalRole,
+      city: city ? city.trim() : (finalRole === 'CITIZEN' ? 'Pune' : null),
+      departmentName: deptName ? deptName.trim() : null,
+      organizationName: orgName ? orgName.trim() : null,
+      designation: designation ? designation.trim() : null,
+      areaOfExpertise: expField ? expField.trim() : null,
+      industryType: industryType ? industryType.trim() : null,
+      isVerified: true,
+      isActive: true,
+    };
+
     let newUser;
     try {
       newUser = await prisma.user.create({
-        data: {
-          name: name.trim(),
-          email: normalizedEmail,
-          phone: phone ? phone.trim() : null,
-          passwordHash,
-          role: 'CITIZEN', // STRICT ENFORCEMENT
-        },
+        data: newUserData,
       });
     } catch (createErr) {
       if (isDbOffline(createErr)) {
-        newUser = offlineStore.createUser({
-          name: name.trim(),
-          email: normalizedEmail,
-          phone: phone ? phone.trim() : null,
-          passwordHash,
-          role: 'CITIZEN',
-        });
+        newUser = offlineStore.createUser(newUserData);
       } else {
         throw createErr;
       }
@@ -98,7 +140,7 @@ const register = async (req, res, next) => {
       sanitizeUser(newUser),
       201,
       res,
-      'Registration successful. Welcome to JanSamadhan!'
+      `Registration successful. Welcome to JanSamadhan as ${finalRole}!`
     );
   } catch (error) {
     next(error);

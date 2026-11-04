@@ -29,6 +29,7 @@ const proposalRoutes = require('./routes/proposals');
 const analyticsRoutes = require('./routes/analytics');
 const reportRoutes = require('./routes/reports');
 const dashboardRoutes = require('./routes/dashboard');
+const publicFeedRoutes = require('./routes/publicFeed');
 
 
 
@@ -106,6 +107,7 @@ app.use('/api/proposals', proposalRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/public/civic-feed', publicFeedRoutes);
 
 
 

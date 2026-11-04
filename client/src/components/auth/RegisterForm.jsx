@@ -1,16 +1,42 @@
 /**
- * JanSamadhan – RegisterForm Component
- * Citizen registration with comprehensive client validation, strength indicator, and terms agreement.
+ * JanSamadhan – Multi-Stakeholder RegisterForm Component
+ * Supports 4 verified account types: Citizen, Government, University, and Industry.
+ * Implements strict input validation, password strength requirements, and role workflows.
  */
 
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { User, Mail, Phone, Lock, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import {
+  User,
+  Mail,
+  Phone,
+  Lock,
+  Eye,
+  EyeOff,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  ShieldCheck,
+  Building2,
+  GraduationCap,
+  Briefcase,
+  MapPin,
+  Award,
+} from 'lucide-react';
+
+const ACCOUNT_TYPES = [
+  { id: 'CITIZEN', label: 'Citizen', icon: User, desc: 'Civic Reporting & Neighborhood Tracking' },
+  { id: 'GOVERNMENT', label: 'Government', icon: Building2, desc: 'Municipal Verification & Task Force' },
+  { id: 'UNIVERSITY', label: 'University', icon: GraduationCap, desc: 'Academic Research & Solution Pilots' },
+  { id: 'INDUSTRY', label: 'Industry', icon: Briefcase, desc: 'CSR Partnerships & Technical Implementation' },
+];
 
 export default function RegisterForm() {
   const navigate = useNavigate();
   const { register } = useAuth();
+
+  const [accountType, setAccountType] = useState('CITIZEN');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -18,6 +44,17 @@ export default function RegisterForm() {
     phone: '',
     password: '',
     confirmPassword: '',
+    city: 'Pune',
+    // Government specific
+    departmentName: '',
+    organizationName: '',
+    designation: '',
+    // University specific
+    universityName: '',
+    areaOfExpertise: '',
+    // Industry specific
+    companyName: '',
+    industryType: '',
     agreeTerms: false,
   });
 
@@ -36,15 +73,14 @@ export default function RegisterForm() {
     if (errorMessage) setErrorMessage('');
   };
 
-  // Client validation helper
   const validateForm = () => {
     if (!formData.name.trim() || formData.name.trim().length < 2) {
-      return 'Please enter your full name (minimum 2 characters).';
+      return 'Please enter full name / authorized representative name (minimum 2 characters).';
     }
 
     const emailRegex = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,})+$/;
     if (!formData.email.trim() || !emailRegex.test(formData.email.trim())) {
-      return 'Please enter a valid email address.';
+      return 'Please enter a valid official/personal email address.';
     }
 
     const phoneRegex = /^[0-9+() -]{7,20}$/;
@@ -72,8 +108,23 @@ export default function RegisterForm() {
       return 'Passwords do not match.';
     }
 
+    // Role-specific validations
+    if (accountType === 'GOVERNMENT') {
+      if (!formData.departmentName.trim()) return 'Please provide your government department.';
+      if (!formData.organizationName.trim()) return 'Please provide your municipal corporation or authority name.';
+      if (!formData.designation.trim()) return 'Please enter your official designation.';
+    } else if (accountType === 'UNIVERSITY') {
+      if (!formData.universityName.trim()) return 'Please enter your university / research institution name.';
+      if (!formData.departmentName.trim()) return 'Please enter your academic department.';
+      if (!formData.areaOfExpertise.trim()) return 'Please specify your research or technical domain.';
+    } else if (accountType === 'INDUSTRY') {
+      if (!formData.companyName.trim()) return 'Please enter your company or corporate entity name.';
+      if (!formData.industryType.trim()) return 'Please specify your industry sector.';
+      if (!formData.areaOfExpertise.trim()) return 'Please specify your technology/CSR focus area.';
+    }
+
     if (!formData.agreeTerms) {
-      return 'You must accept the Terms and Conditions to create an account.';
+      return 'You must accept the Civic Platform Terms and Conditions to proceed.';
     }
 
     return null;
@@ -91,35 +142,86 @@ export default function RegisterForm() {
     }
 
     setLoading(true);
-    const result = await register({
+    const payload = {
       name: formData.name.trim(),
       email: formData.email.trim(),
       phone: formData.phone.trim() || undefined,
       password: formData.password,
       confirmPassword: formData.confirmPassword,
+      role: accountType,
+      accountType,
+      city: formData.city.trim(),
+      departmentName: formData.departmentName.trim() || undefined,
+      organizationName: (formData.organizationName || formData.universityName || formData.companyName || '').trim() || undefined,
+      designation: formData.designation.trim() || undefined,
+      areaOfExpertise: formData.areaOfExpertise.trim() || undefined,
+      industryType: formData.industryType.trim() || undefined,
       termsAccepted: formData.agreeTerms,
-    });
+    };
+
+    const result = await register(payload);
     setLoading(false);
 
     if (result.success) {
-      setSuccessMessage('Account created! Redirecting to your Citizen Dashboard…');
+      setSuccessMessage(`Account created successfully! Launching your ${accountType} workspace…`);
       setTimeout(() => {
-        navigate(result.redirectTo || '/citizen/dashboard', { replace: true });
+        navigate(result.redirectTo || (
+          accountType === 'GOVERNMENT' ? '/government/dashboard' :
+          accountType === 'UNIVERSITY' ? '/university/dashboard' :
+          accountType === 'INDUSTRY' ? '/industry/dashboard' :
+          '/citizen/dashboard'
+        ), { replace: true });
       }, 700);
     } else {
-      setErrorMessage(result.error || 'Registration failed. Please try again.');
+      setErrorMessage(result.error || 'Registration failed. Please check your details and try again.');
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-      {/* Role notice banner */}
-      <div className="p-3 rounded-xl bg-green-light/70 border border-green-200 flex items-start gap-2.5 text-xs text-green-700">
-        <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-green" />
-        <span>
-          <strong>Citizen Registration:</strong> Public sign-up creates standard Citizen accounts. Government, University, and Expert credentials are authorized separately by administration.
-        </span>
+      {/* ── 1. Account Type Selector Tabs ──────────────────────────────────── */}
+      <div>
+        <label className="block text-xs font-bold text-navy uppercase tracking-wider mb-2">
+          Select Account Type <span className="text-rose-500">*</span>
+        </label>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {ACCOUNT_TYPES.map((type) => {
+            const Icon = type.icon;
+            const isSelected = accountType === type.id;
+            return (
+              <button
+                key={type.id}
+                type="button"
+                onClick={() => {
+                  setAccountType(type.id);
+                  setErrorMessage('');
+                }}
+                className={`p-3 rounded-2xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
+                  isSelected
+                    ? 'border-green bg-green-light/60 text-navy font-bold shadow-xs'
+                    : 'border-civic-border bg-gray-50 text-civic-secondary hover:bg-gray-100 hover:text-navy'
+                }`}
+              >
+                <Icon size={18} className={isSelected ? 'text-green' : 'text-gray-400'} />
+                <span className="text-xs">{type.label}</span>
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-[11px] text-civic-secondary mt-1.5 text-center">
+          {ACCOUNT_TYPES.find((t) => t.id === accountType)?.desc}
+        </p>
       </div>
+
+      {/* Security Workflow Notice for Institutional Accounts */}
+      {accountType !== 'CITIZEN' && (
+        <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-2.5 text-xs text-amber-900">
+          <ShieldCheck className="w-4 h-4 shrink-0 mt-0.5 text-amber-700" />
+          <span>
+            <strong>Official {accountType} Workflow:</strong> Privileged institutional credentials are logged with audit trails. Official actions, department routing, and solution proposals require verified domain identity.
+          </span>
+        </div>
+      )}
 
       {/* Error alert */}
       {errorMessage && (
@@ -137,14 +239,19 @@ export default function RegisterForm() {
         </div>
       )}
 
-      {/* Full Name */}
+      {/* ── 2. Common Fields ────────────────────────────────────────────────── */}
       <div>
         <label htmlFor="name" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
-          Full Name <span className="text-rose-500">*</span>
+          {accountType === 'GOVERNMENT'
+            ? 'Officer Full Name'
+            : accountType === 'CITIZEN'
+            ? 'Citizen Full Name'
+            : 'Authorized Representative Name'}{' '}
+          <span className="text-rose-500">*</span>
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
-            <User className="w-4.5 h-4.5" size={18} />
+            <User className="w-4 h-4" />
           </div>
           <input
             id="name"
@@ -153,121 +260,315 @@ export default function RegisterForm() {
             required
             value={formData.name}
             onChange={handleChange}
-            placeholder="Aarav Sharma"
-            className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-civic-border bg-white text-civic-text placeholder:text-civic-secondary/50 focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
+            placeholder={
+              accountType === 'GOVERNMENT'
+                ? 'e.g. Dr. Rajesh Sharma'
+                : accountType === 'UNIVERSITY'
+                ? 'e.g. Prof. Priya Narayanan'
+                : 'e.g. Ananya Deshmukh'
+            }
+            className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
           />
         </div>
       </div>
 
-      {/* Email Address */}
+      {/* Email */}
       <div>
-        <label htmlFor="reg-email" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
-          Email Address <span className="text-rose-500">*</span>
+        <label htmlFor="email" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+          {accountType !== 'CITIZEN' ? 'Official / Institutional Email' : 'Email Address'}{' '}
+          <span className="text-rose-500">*</span>
         </label>
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
-            <Mail className="w-4.5 h-4.5" size={18} />
+            <Mail className="w-4 h-4" />
           </div>
           <input
-            id="reg-email"
+            id="email"
             name="email"
             type="email"
-            autoComplete="email"
             required
             value={formData.email}
             onChange={handleChange}
-            placeholder="name@example.com"
-            className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-civic-border bg-white text-civic-text placeholder:text-civic-secondary/50 focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
+            placeholder={
+              accountType === 'GOVERNMENT'
+                ? 'officer@punecorporation.org'
+                : accountType === 'UNIVERSITY'
+                ? 'dean.research@iitb.ac.in'
+                : accountType === 'INDUSTRY'
+                ? 'csr.director@tata.com'
+                : 'citizen@example.com'
+            }
+            className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
           />
         </div>
       </div>
 
-      {/* Mobile Number (optional) */}
-      <div>
-        <label htmlFor="phone" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
-          Mobile Number <span className="text-civic-secondary font-normal">(optional)</span>
-        </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
-            <Phone className="w-4.5 h-4.5" size={18} />
+      {/* ── 3. Role-Specific Dynamic Fields ─────────────────────────────────── */}
+
+      {/* Citizen: Phone and City */}
+      {accountType === 'CITIZEN' && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label htmlFor="phone" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+              Phone Number (Optional)
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
+                <Phone className="w-4 h-4" />
+              </div>
+              <input
+                id="phone"
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="+91 98765 43210"
+                className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
+              />
+            </div>
           </div>
-          <input
-            id="phone"
-            name="phone"
-            type="tel"
-            autoComplete="tel"
-            value={formData.phone}
-            onChange={handleChange}
-            placeholder="+91 98765 43210"
-            className="w-full pl-10 pr-4 py-2 text-sm rounded-xl border border-civic-border bg-white text-civic-text placeholder:text-civic-secondary/50 focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
-          />
-        </div>
-      </div>
-
-      {/* Password */}
-      <div>
-        <label htmlFor="reg-password" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
-          Password <span className="text-rose-500">*</span>
-        </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
-            <Lock className="w-4.5 h-4.5" size={18} />
+          <div>
+            <label htmlFor="city" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+              City / Ward <span className="text-rose-500">*</span>
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <input
+                id="city"
+                name="city"
+                type="text"
+                required
+                value={formData.city}
+                onChange={handleChange}
+                placeholder="e.g. Pune"
+                className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
+              />
+            </div>
           </div>
-          <input
-            id="reg-password"
-            name="password"
-            type={showPassword ? 'text' : 'password'}
-            autoComplete="new-password"
-            required
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Min 8 characters (e.g. Divyansh@12)"
-            className="w-full pl-10 pr-11 py-2 text-sm rounded-xl border border-civic-border bg-white text-civic-text placeholder:text-civic-secondary/50 focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-civic-secondary hover:text-navy transition-colors"
-          >
-            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
         </div>
-        <p className="mt-1 text-[11px] text-civic-secondary">
-          Password must have at least 8 characters with 1 uppercase letter, 1 lowercase letter, and 1 number.
-        </p>
-      </div>
+      )}
 
-      {/* Confirm Password */}
-      <div>
-        <label htmlFor="confirmPassword" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
-          Confirm Password <span className="text-rose-500">*</span>
-        </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
-            <Lock className="w-4.5 h-4.5" size={18} />
+      {/* Government: Department, Organization, Designation */}
+      {accountType === 'GOVERNMENT' && (
+        <div className="space-y-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="organizationName" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+                Government Organization <span className="text-rose-500">*</span>
+              </label>
+              <input
+                id="organizationName"
+                name="organizationName"
+                type="text"
+                required
+                value={formData.organizationName}
+                onChange={handleChange}
+                placeholder="e.g. Pune Municipal Corporation (PMC)"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+              />
+            </div>
+            <div>
+              <label htmlFor="departmentName" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+                Municipal Department <span className="text-rose-500">*</span>
+              </label>
+              <input
+                id="departmentName"
+                name="departmentName"
+                type="text"
+                required
+                value={formData.departmentName}
+                onChange={handleChange}
+                placeholder="e.g. Public Works Department (Roads)"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+              />
+            </div>
           </div>
-          <input
-            id="confirmPassword"
-            name="confirmPassword"
-            type={showConfirmPassword ? 'text' : 'password'}
-            autoComplete="new-password"
-            required
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            placeholder="Re-enter your password"
-            className="w-full pl-10 pr-11 py-2 text-sm rounded-xl border border-civic-border bg-white text-civic-text placeholder:text-civic-secondary/50 focus:outline-none focus:ring-2 focus:ring-green focus:border-green transition-all"
-          />
-          <button
-            type="button"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-civic-secondary hover:text-navy transition-colors"
-          >
-            {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-          </button>
+          <div>
+            <label htmlFor="designation" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+              Official Designation <span className="text-rose-500">*</span>
+            </label>
+            <input
+              id="designation"
+              name="designation"
+              type="text"
+              required
+              value={formData.designation}
+              onChange={handleChange}
+              placeholder="e.g. Executive Engineer / Ward Officer"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* University: University Name, Department, Area of Expertise */}
+      {accountType === 'UNIVERSITY' && (
+        <div className="space-y-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="universityName" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+                University / Institution Name <span className="text-rose-500">*</span>
+              </label>
+              <input
+                id="universityName"
+                name="universityName"
+                type="text"
+                required
+                value={formData.universityName}
+                onChange={handleChange}
+                placeholder="e.g. IIT Bombay / COEP Tech"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+              />
+            </div>
+            <div>
+              <label htmlFor="departmentName" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+                Academic Department <span className="text-rose-500">*</span>
+              </label>
+              <input
+                id="departmentName"
+                name="departmentName"
+                type="text"
+                required
+                value={formData.departmentName}
+                onChange={handleChange}
+                placeholder="e.g. Civil & Environmental Eng."
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="areaOfExpertise" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+              Area of Research & Expertise <span className="text-rose-500">*</span>
+            </label>
+            <input
+              id="areaOfExpertise"
+              name="areaOfExpertise"
+              type="text"
+              required
+              value={formData.areaOfExpertise}
+              onChange={handleChange}
+              placeholder="e.g. Urban Hydrology, Smart Waste Recycling, Air Quality Sensors"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Industry: Company Name, Industry Type, Area of Expertise */}
+      {accountType === 'INDUSTRY' && (
+        <div className="space-y-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-200">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="companyName" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+                Company / Organization Name <span className="text-rose-500">*</span>
+              </label>
+              <input
+                id="companyName"
+                name="companyName"
+                type="text"
+                required
+                value={formData.companyName}
+                onChange={handleChange}
+                placeholder="e.g. Tata Motors CSR / L&T Infra"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+              />
+            </div>
+            <div>
+              <label htmlFor="industryType" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+                Industry Sector <span className="text-rose-500">*</span>
+              </label>
+              <input
+                id="industryType"
+                name="industryType"
+                type="text"
+                required
+                value={formData.industryType}
+                onChange={handleChange}
+                placeholder="e.g. Clean Energy, Construction Tech"
+                className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+              />
+            </div>
+          </div>
+          <div>
+            <label htmlFor="areaOfExpertise" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+              Technical Expertise / CSR Focus <span className="text-rose-500">*</span>
+            </label>
+            <input
+              id="areaOfExpertise"
+              name="areaOfExpertise"
+              type="text"
+              required
+              value={formData.areaOfExpertise}
+              onChange={handleChange}
+              placeholder="e.g. Solar Microgrids, Rapid Pothole Patching Technology"
+              className="w-full px-3.5 py-2 text-xs sm:text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ── 4. Passwords ────────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <label htmlFor="password" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+            Password <span className="text-rose-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
+              <Lock className="w-4 h-4" />
+            </div>
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="••••••••"
+              className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-civic-secondary hover:text-navy"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <label htmlFor="confirmPassword" className="block text-xs font-semibold text-navy uppercase tracking-wider mb-1.5">
+            Confirm Password <span className="text-rose-500">*</span>
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-civic-secondary">
+              <Lock className="w-4 h-4" />
+            </div>
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              required
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="••••••••"
+              className="w-full pl-10 pr-10 py-2.5 text-sm rounded-xl border border-civic-border bg-white text-civic-text focus:outline-none focus:ring-2 focus:ring-green"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-civic-secondary hover:text-navy"
+            >
+              {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Terms and Conditions Checkbox */}
+      {/* Terms checkbox */}
       <div className="flex items-start pt-1">
         <input
           id="agreeTerms"
@@ -275,18 +576,12 @@ export default function RegisterForm() {
           type="checkbox"
           checked={formData.agreeTerms}
           onChange={handleChange}
-          className="w-4 h-4 mt-0.5 text-green border-civic-border rounded focus:ring-green focus:ring-offset-0 cursor-pointer"
+          className="w-4 h-4 mt-0.5 text-green border-civic-border rounded focus:ring-green cursor-pointer"
         />
-        <label htmlFor="agreeTerms" className="ml-2.5 block text-xs text-civic-secondary leading-relaxed cursor-pointer">
-          I agree to the{' '}
-          <span className="text-navy font-semibold hover:underline cursor-pointer">
-            Terms of Service
-          </span>{' '}
-          and{' '}
-          <span className="text-navy font-semibold hover:underline cursor-pointer">
-            Privacy Policy
-          </span>{' '}
-          of the JanSamadhan Platform.
+        <label htmlFor="agreeTerms" className="ml-2.5 text-xs text-civic-secondary cursor-pointer leading-relaxed">
+          I confirm that the information provided is accurate and agree to the{' '}
+          <span className="font-semibold text-navy hover:underline">Civic Participation Terms</span> and{' '}
+          <span className="font-semibold text-navy hover:underline">Privacy Charter</span>.
         </label>
       </div>
 
@@ -299,21 +594,20 @@ export default function RegisterForm() {
         {loading ? (
           <>
             <Loader2 className="w-4.5 h-4.5 animate-spin" size={18} />
-            <span>Creating Citizen Account…</span>
+            <span>Creating {accountType} Account…</span>
           </>
         ) : (
-          <span>Create Citizen Account</span>
+          <span>Complete {accountType} Registration</span>
         )}
       </button>
 
       {/* Switch to login */}
       <p className="text-center text-xs text-civic-secondary pt-2">
-        Already have an account?{' '}
+        Already registered?{' '}
         <Link to="/login" className="font-semibold text-green hover:underline">
-          Log in here
+          Sign In Here
         </Link>
       </p>
     </form>
   );
 }
-

@@ -4,6 +4,7 @@
  */
 
 const { prisma } = require('../config/db');
+const offlineStore = require('../config/offlineStore');
 
 function isDbOffline(err) {
   return (
@@ -14,13 +15,13 @@ function isDbOffline(err) {
 
 // GET /api/proposals
 const listProposals = async (req, res) => {
-  try {
-    const { page = 1, limit = 20, status, problemId } = req.query;
-    const skip = (parseInt(page) - 1) * parseInt(limit);
-    const where = {};
-    if (status) where.status = status;
-    if (problemId) where.problemId = problemId;
+  const { page = 1, limit = 20, status, problemId } = req.query || {};
+  const skip = (parseInt(page, 10) - 1) * parseInt(limit, 10);
+  const where = {};
+  if (status) where.status = status;
+  if (problemId) where.problemId = problemId;
 
+  try {
     const [proposals, total] = await Promise.all([
       prisma.solutionProposal.findMany({
         where,
@@ -38,7 +39,8 @@ const listProposals = async (req, res) => {
     res.json({ success: true, data: { proposals, total } });
   } catch (err) {
     if (isDbOffline(err)) {
-      return res.json({ success: true, data: { proposals: [], total: 0 }, offline: true });
+      const proposals = offlineStore.listProposals({ status, problemId });
+      return res.json({ success: true, data: { proposals, total: proposals.length }, offline: true });
     }
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -67,14 +69,16 @@ const getProposal = async (req, res) => {
 
 // POST /api/proposals
 const createProposal = async (req, res) => {
+  const { problemId, title, description, proposedApproach, estimatedCost, estimatedDuration, organizationId } = req.body || {};
+
+  if (!problemId || !title || !description || !proposedApproach) {
+    return res.status(400).json({
+      success: false,
+      message: 'problemId, title, description, proposedApproach are required',
+    });
+  }
+
   try {
-    const { problemId, title, description, proposedApproach, estimatedCost, estimatedDuration, organizationId } = req.body;
-    if (!problemId || !title || !description || !proposedApproach) {
-      return res.status(400).json({
-        success: false,
-        message: 'problemId, title, description, proposedApproach are required',
-      });
-    }
     const proposal = await prisma.solutionProposal.create({
       data: {
         problemId,
@@ -91,7 +95,18 @@ const createProposal = async (req, res) => {
     res.status(201).json({ success: true, data: proposal });
   } catch (err) {
     if (isDbOffline(err)) {
-      return res.status(503).json({ success: false, message: 'Database offline' });
+      const proposal = offlineStore.createProposal({
+        problemId,
+        submittedBy: req.user?.id || 'usr-univ',
+        title,
+        description,
+        proposedApproach,
+        estimatedCost: estimatedCost ? parseFloat(estimatedCost) : null,
+        estimatedDuration,
+        organizationId,
+        submitter: { id: req.user?.id, name: req.user?.name, role: req.user?.role },
+      });
+      return res.status(201).json({ success: true, data: proposal, offline: true });
     }
     res.status(500).json({ success: false, message: 'Server error' });
   }
@@ -111,7 +126,8 @@ const updateProposalStatus = async (req, res) => {
     res.json({ success: true, data: updated });
   } catch (err) {
     if (isDbOffline(err)) {
-      return res.status(503).json({ success: false, message: 'Database offline' });
+      const updated = offlineStore.updateProposalStatus(req.params.id, req.body?.status);
+      return res.json({ success: true, data: updated, offline: true });
     }
     res.status(500).json({ success: false, message: 'Server error' });
   }
