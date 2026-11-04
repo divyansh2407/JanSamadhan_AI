@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Building2, User, LogOut, LayoutDashboard, MapPin } from 'lucide-react';
+import { Menu, X, Building2, User, LogOut, LayoutDashboard, MapPin, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 const NAV_LINKS = [
@@ -123,6 +123,14 @@ export default function Navbar() {
               Analytics
             </Link>
             <Link
+              to="/government/dashboard"
+              className="px-2.5 py-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-xs"
+              title="Official Municipal Administration & Verification Portal"
+            >
+              <Shield size={13} className="text-amber-700" />
+              <span>Gov Portal</span>
+            </Link>
+            <Link
               to="/track"
               className="px-3 py-1.5 text-xs font-semibold text-civic-secondary hover:text-navy hover:bg-civic-bg rounded-lg transition-colors"
             >
@@ -204,7 +212,7 @@ export default function Navbar() {
             </a>
           ))}
 
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-civic-border">
+          <div className="grid grid-cols-4 gap-2 pt-2 border-t border-civic-border">
             <Link
               to="/map"
               onClick={() => setIsOpen(false)}
@@ -226,6 +234,14 @@ export default function Navbar() {
               className="text-center px-2 py-2 text-xs font-semibold text-navy bg-civic-bg hover:bg-green-light rounded-lg transition-colors"
             >
               Track
+            </Link>
+            <Link
+              to="/government/dashboard"
+              onClick={() => setIsOpen(false)}
+              className="text-center px-2 py-2 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 rounded-lg transition-colors flex items-center justify-center gap-1"
+            >
+              <Shield size={12} className="text-amber-700" />
+              <span>Gov</span>
             </Link>
           </div>
 

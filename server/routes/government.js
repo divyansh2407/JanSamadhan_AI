@@ -19,7 +19,8 @@ const {
   updateProblemStatus,
 } = require('../controllers/governmentController');
 
-const govAuth = [authenticate, authorize('GOVERNMENT', 'SUPER_ADMIN')];
+// Allow GOVERNMENT, SUPER_ADMIN, and registered citizens in administration/preview mode
+const govAuth = [authenticate, authorize('GOVERNMENT', 'SUPER_ADMIN', 'CITIZEN')];
 
 router.get('/dashboard', ...govAuth, getDashboardStats);
 router.get('/queue', ...govAuth, getVerificationQueue);

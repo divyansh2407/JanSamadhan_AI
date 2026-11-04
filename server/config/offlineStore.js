@@ -100,6 +100,81 @@ class OfflineStore {
         isActive: true,
       },
     ];
+
+    this.departments = [
+      {
+        id: 'dept-pwd',
+        name: 'Public Works Department (Roads & Infrastructure)',
+        departmentCode: 'PWD_PMC',
+        contactEmail: 'pwd@punecorporation.org',
+        contactPhone: '+91 20 2550 1100',
+        isActive: true,
+      },
+      {
+        id: 'dept-elec',
+        name: 'Electrical & Street Lighting Department',
+        departmentCode: 'ELEC_PMC',
+        contactEmail: 'electric@punecorporation.org',
+        contactPhone: '+91 20 2550 1101',
+        isActive: true,
+      },
+      {
+        id: 'dept-water',
+        name: 'Water Supply & Drainage Department',
+        departmentCode: 'WATER_PMC',
+        contactEmail: 'water@punecorporation.org',
+        contactPhone: '+91 20 2550 1102',
+        isActive: true,
+      },
+      {
+        id: 'dept-swm',
+        name: 'Solid Waste Management & Sanitation',
+        departmentCode: 'SWM_PMC',
+        contactEmail: 'waste@punecorporation.org',
+        contactPhone: '+91 20 2550 1103',
+        isActive: true,
+      },
+      {
+        id: 'dept-health',
+        name: 'Public Health Department',
+        departmentCode: 'HEALTH_PMC',
+        contactEmail: 'health@punecorporation.org',
+        contactPhone: '+91 20 2550 1104',
+        isActive: true,
+      },
+      {
+        id: 'dept-traffic',
+        name: 'Traffic & Transport Department',
+        departmentCode: 'TRAFFIC_PMC',
+        contactEmail: 'traffic@punecorporation.org',
+        contactPhone: '+91 20 2550 1105',
+        isActive: true,
+      },
+    ];
+
+    this.officers = [
+      {
+        id: 'off-01',
+        name: 'Dr. Ramesh Kulkarni',
+        designation: 'Ward Executive Engineer',
+        email: 'ramesh.kulkarni@punecorporation.org',
+        department: 'Public Works Department',
+      },
+      {
+        id: 'off-02',
+        name: 'Sunita Patil',
+        designation: 'Senior Sanitary Inspector',
+        email: 'sunita.patil@punecorporation.org',
+        department: 'Solid Waste Management',
+      },
+      {
+        id: 'off-03',
+        name: 'Vikram Shinde',
+        designation: 'Junior Electrical Engineer',
+        email: 'vikram.shinde@punecorporation.org',
+        department: 'Electrical & Street Lighting',
+      },
+    ];
   }
 
   // ── User Methods ──────────────────────────────────────────────────────────
@@ -260,6 +335,133 @@ class OfflineStore {
       inProgressReports,
       resolvedReports,
     };
+  }
+
+  // ── Government Administration Methods ─────────────────────────────────────
+  getGovStats() {
+    let total = 0;
+    let pending = 0;
+    let verified = 0;
+    let inProgress = 0;
+    let resolved = 0;
+
+    const seen = new Set();
+    for (const prob of this.problems.values()) {
+      if (seen.has(prob.id)) continue;
+      seen.add(prob.id);
+
+      total++;
+      if (prob.isVerified) verified++;
+      if (prob.status === 'SUBMITTED' || prob.status === 'UNDER_REVIEW') pending++;
+      else if (prob.status === 'IN_PROGRESS') inProgress++;
+      else if (prob.status === 'RESOLVED') resolved++;
+    }
+
+    return { total, pending, verified, inProgress, resolved };
+  }
+
+  getGovQueue(filters = {}) {
+    const list = [];
+    const seen = new Set();
+
+    for (const prob of this.problems.values()) {
+      if (seen.has(prob.id)) continue;
+      seen.add(prob.id);
+
+      // Status filter
+      if (filters.status && prob.status !== filters.status.toUpperCase()) {
+        continue;
+      }
+      // Severity filter
+      if (filters.severity && prob.severity !== filters.severity.toUpperCase()) {
+        continue;
+      }
+      // Category filter
+      if (filters.category && prob.categoryId !== filters.category) {
+        continue;
+      }
+
+      list.push(prob);
+    }
+
+    // Order by severity (CRITICAL > HIGH > MEDIUM > LOW) and date
+    const severityWeight = { CRITICAL: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+    list.sort((a, b) => {
+      const swDiff = (severityWeight[b.severity] || 0) - (severityWeight[a.severity] || 0);
+      if (swDiff !== 0) return swDiff;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    return list;
+  }
+
+  verifyGovProblem(id, officerId, notes, isVerified = true) {
+    const prob = this.findProblem(id);
+    if (!prob) return null;
+
+    prob.isVerified = isVerified;
+    if (isVerified && prob.status === 'SUBMITTED') {
+      prob.status = 'UNDER_REVIEW';
+    }
+    prob.statusHistory = prob.statusHistory || [];
+    prob.statusHistory.push({
+      id: `hist-${Date.now()}`,
+      problemId: id,
+      fromStatus: 'SUBMITTED',
+      toStatus: prob.status,
+      remarks: notes || `Verification status updated: ${isVerified ? 'VERIFIED' : 'REJECTED'}`,
+      createdAt: new Date(),
+    });
+
+    return prob;
+  }
+
+  assignGovDepartment(id, deptId, notes, priority = 'NORMAL') {
+    const prob = this.findProblem(id);
+    if (!prob) return null;
+
+    const dept = this.departments.find((d) => d.id === deptId) || {
+      id: deptId,
+      name: 'Municipal Engineering Department',
+      departmentCode: 'MUNICIPAL-ENG',
+    };
+
+    prob.assignedDepartment = dept;
+    prob.assignedDepartmentId = dept.id;
+    prob.priority = priority;
+    prob.status = 'IN_PROGRESS';
+
+    prob.statusHistory = prob.statusHistory || [];
+    prob.statusHistory.push({
+      id: `hist-${Date.now()}`,
+      problemId: id,
+      fromStatus: 'UNDER_REVIEW',
+      toStatus: 'IN_PROGRESS',
+      remarks: notes || `Assigned to department: ${dept.name} with priority ${priority}`,
+      createdAt: new Date(),
+    });
+
+    return prob;
+  }
+
+  updateGovProblemStatus(id, newStatus, remarks) {
+    const prob = this.findProblem(id);
+    if (!prob) return null;
+
+    const oldStatus = prob.status;
+    prob.status = newStatus;
+
+    prob.statusHistory = prob.statusHistory || [];
+    prob.statusHistory.push({
+      id: `hist-${Date.now()}`,
+      problemId: id,
+      fromStatus: oldStatus,
+      toStatus: newStatus,
+      remarks: remarks || `Status changed from ${oldStatus} to ${newStatus}`,
+      createdAt: new Date(),
+    });
+
+    return prob;
   }
 
   recordEmail(emailData) {

@@ -201,7 +201,19 @@ export default function GovernmentDashboard() {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              to="/citizen/dashboard"
+              className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 transition-colors"
+            >
+              <span>Citizen View</span>
+            </Link>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 transition-colors"
+            >
+              <span>Home</span>
+            </Link>
             <Link
               to="/analytics"
               className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-50 text-green-800 hover:bg-green-100 border border-green-200"
@@ -219,6 +231,29 @@ export default function GovernmentDashboard() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        {/* Evaluation / Citizen Mode Banner */}
+        {user?.role === 'CITIZEN' && (
+          <div className="mb-6 p-4 rounded-2xl bg-amber-50 border border-amber-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <span className="text-2xl mt-0.5">🏛️</span>
+              <div>
+                <p className="text-xs font-bold text-amber-900 tracking-wide">
+                  Municipal Administration Portal • Governance & Evaluation View
+                </p>
+                <p className="text-xs text-amber-800 leading-relaxed mt-0.5">
+                  Logged in as registered citizen ({user?.name || user?.email}). You have full administrative access to review reported issues, conduct ground verifications, assign municipal departments, and resolve tickets.
+                </p>
+              </div>
+            </div>
+            <Link
+              to="/citizen/dashboard"
+              className="self-start sm:self-center shrink-0 px-3 py-1.5 text-xs font-semibold text-amber-900 bg-amber-200/80 hover:bg-amber-300 rounded-lg transition-colors border border-amber-300"
+            >
+              Citizen View
+            </Link>
+          </div>
+        )}
+
         {/* Metric Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <div className="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">

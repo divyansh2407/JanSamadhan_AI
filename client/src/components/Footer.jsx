@@ -112,12 +112,18 @@ export default function Footer() {
 
             <div className="mt-6">
               <span className="block text-xs text-white/40 mb-2">Portal Access</span>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Link
                   to="/login"
                   className="text-xs px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition-colors"
                 >
                   Citizen Login
+                </Link>
+                <Link
+                  to="/government/dashboard"
+                  className="text-xs px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 hover:bg-amber-500/30 font-medium transition-colors"
+                >
+                  Gov Portal
                 </Link>
                 <Link
                   to="/register"

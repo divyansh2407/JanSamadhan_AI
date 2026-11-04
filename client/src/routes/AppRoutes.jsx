@@ -55,7 +55,7 @@ export default function AppRoutes() {
       <Route
         path="/government/dashboard"
         element={
-          <ProtectedRoute allowedRoles={['GOVERNMENT', 'SUPER_ADMIN']}>
+          <ProtectedRoute allowedRoles={['GOVERNMENT', 'SUPER_ADMIN', 'CITIZEN']}>
             <GovernmentDashboard />
           </ProtectedRoute>
         }
@@ -63,7 +63,7 @@ export default function AppRoutes() {
       <Route
         path="/government/ai-review/:problemId"
         element={
-          <ProtectedRoute allowedRoles={['GOVERNMENT', 'SUPER_ADMIN']}>
+          <ProtectedRoute allowedRoles={['GOVERNMENT', 'SUPER_ADMIN', 'CITIZEN']}>
             <AIAnalysisPreviewPage />
           </ProtectedRoute>
         }

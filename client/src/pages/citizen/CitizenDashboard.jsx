@@ -309,6 +309,18 @@ export default function CitizenDashboard() {
               <HelpCircle className="w-4 h-4 shrink-0" />
               <span>Help & Support</span>
             </button>
+
+            {/* 7. Government Administration Portal */}
+            <button
+              onClick={() => {
+                navigate('/government/dashboard');
+                setIsMobileMenuOpen(false);
+              }}
+              className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 transition-all font-semibold"
+            >
+              <Shield className="w-4 h-4 shrink-0 text-amber-700" />
+              <span>Gov Admin Portal</span>
+            </button>
           </nav>
         </div>
 
@@ -376,7 +388,17 @@ export default function CitizenDashboard() {
           </div>
 
           {/* Right Action Icons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Gov Admin Portal Quick Link */}
+            <button
+              onClick={() => navigate('/government/dashboard')}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition-all shadow-xs"
+              title="Switch to Municipal Administration & Verification Portal"
+            >
+              <Shield className="w-3.5 h-3.5 text-amber-700" />
+              <span>Gov Portal</span>
+            </button>
+
             {/* Quick Action Button */}
             <button
               onClick={() => navigate('/report/submit?mode=registered')}
